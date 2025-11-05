@@ -1,0 +1,178 @@
+\chapter{AVL Tree (AVLT)}
+\label{cap:AVL}
+
+Inserire $n$ elementi casuali in un BST produce, in media, un albero di altezza $O(\log n)$. Tuttavia, nel caso peggiore (ad esempio, inserendo gli elementi in ordine crescente), l'altezza dell'albero può diventare $O(n)$, degradando le prestazioni delle operazioni di ricerca, inserimento e cancellazione a tempo lineare.
+
+Per evitare questo problema, vogliamo modificare le operazioni di inserimento e cancellazione in modo da mantenere l'altezza dell'albero sempre logaritmica rispetto al numero di nodi $n$, ossia $h = O(\log n)$, garantendo così prestazioni logaritmiche anche nel caso peggiore. Gli \textbf{alberi AVL} sono una delle strutture dati che implementano questa idea di bilanciamento automatico.
+
+\section{Alberi bilanciati e Balance Factor}
+Per misurare quantitativamente il bilanciamento di un albero, introduciamo una metrica chiamata \textbf{Balance Factor}.
+
+Il balance factor di un nodo $v$, che indichiamo con $\beta(v)$, è definito come la differenza tra l'altezza del suo sottoalbero sinistro e l'altezza del suo sottoalbero destro.
+
+La formula per il calcolo è:
+\[
+\beta(v) = height(\text{left}(v)) - height(\text{right}(v))
+\]
+
+Dove $height(\dots)$ è la funzione che calcola l'altezza di un sottoalbero. Per convenzione, \textbf{l'altezza di un sottoalbero nullo (inesistente) è $-1$}.
+
+Il valore del balance factor ci dice lo stato del nodo:
+\begin{itemize}
+    \item $\beta(v) = 0$: Il nodo è bilanciato (i due sottoalberi hanno la stessa altezza).
+    \item $\beta(v) = +1$: Il sottoalbero sinistro è più alto di 1 (l'albero è "pendente a sinistra").
+    \item $\beta(v) = -1$: Il sottoalbero destro è più alto di 1 (l'albero è "pendente a destra").
+\end{itemize}
+
+
+
+\section{Definizione di Albero AVL}
+Un albero \textbf{AVL} è un albero binario di ricerca (BST) che soddisfa una specifica proprietà di bilanciamento basata sul \textit{balance factor}.
+
+\paragraph{Definizione:} Un albero binario di ricerca è un \textbf{albero AVL} se, \textbf{per ogni nodo $v$} appartenente all'albero, il valore assoluto del suo balance factor $\beta(v)$ è al più $1$.
+
+\[
+| \beta(v) | = | height(\text{left}(v)) - height(\text{right}(v)) | \le 1
+\]
+Questo vincolo, se mantenuto dopo ogni operazione, è sufficiente a garantire che l'altezza totale dell'albero $h$ rimanga sempre logaritmica ($h = O(\log n)$). Se un'operazione di inserimento o cancellazione viola questa proprietà (creando un nodo con $\beta(v) = +2$ o $-2$), l'albero esegue delle specifiche operazioni chiamate \textbf{rotazioni} per ripristinare il bilanciamento.
+
+
+
+\section{Mantenimento della Proprietà AVL: Ristrutturazione}
+Come abbiamo visto, un albero AVL è un BST che deve obbedire alla proprietà di bilanciamento. 
+Le operazioni standard di inserimento e cancellazione di un BST possono violare questa proprietà, creando un nodo con fattore di bilanciamento $+2$ o $-2$.
+
+Quando questo accade, l'albero deve essere "riparato". L'operazione di riparazione è chiamata \textbf{ristrutturazione} (o ribilanciamento) e viene implementata attraverso una o più operazioni primitive chiamate \textbf{rotazioni}.
+
+Dopo un inserimento (o una cancellazione), risaliamo dall'elemento inserito $p$ (o dal padre $p$ dell'elemento cancellato) verso la radice per aggiornare i fattori di bilanciamento. Chiamiamo $z$ il \textbf{primo nodo antenato che incontriamo che risulta sbilanciato}, ovvero con $\beta(z) = +2$ o $\beta(z) = -2$.
+
+Una volta identificato $z$, definiamo:
+\begin{itemize}
+    \item $y$: il \textbf{figlio di $z$ con altezza maggiore} (e nota che $y$ deve essere un antenato di $p$).
+    \item $x$: il \textbf{figlio di $y$ con altezza maggiore}. (non può esserci un
+    pareggio e la posizione $x$ deve anche essere un antenato di $p$, possibilmente $p$ stesso).
+\end{itemize}
+
+L'operazione di ribilanciamento, chiamata \textbf{ristrutturazione trinodale}, \uline{coinvolge sempre e solo questi tre nodi ($x, y, z$) e i loro 4 possibili sottoalberi.}
+L'obiettivo è riordinare $x$, $y$ e $z$ in modo da ottenere un albero binario di ricerca bilanciato. Si identificano i tre nodi (in ordine crescente di chiave) come $a$, $b$, $c$. Il nodo con la chiave mediana ($b$) diventerà la nuova radice, $a$ diventerà il suo figlio sinistro e $c$ il suo figlio destro. I 4 sottoalberi vengono poi riagganciati ordinatamente.
+Questo processo logico unificato si traduce in quattro diversi casi, che richiedono due tipi di operazioni meccaniche: \textbf{le rotazioni singole} e \textbf{le rotazioni doppie}.
+
+Un'operazione di rotazione singola o doppia ha sempre una complessità temporale di $O(1)$, poiché coinvolge solo un numero costante di nodi e puntatori.
+
+\subsection{Caso 1 e 2: Rotazioni Singole (Casi Esterni)}
+Si ha una rotazione singola quando $x$, $y$ e $z$ sono allineati sullo stesso lato.
+
+\subsubsection{Caso Sinistra-Sinistra (LL)}
+Questo caso si verifica quando $y$ è il figlio sinistro di $z$ e $x$ è il figlio sinistro di $y$.
+\begin{itemize}
+    \item $z$: Nodo sbilanciato ($\beta(z) = +2$)
+    \item $y$: Figlio sinistro di $z$
+    \item $x$: Figlio sinistro di $y$
+\end{itemize}
+
+\paragraph{Soluzione: Rotazione Singola a Destra (su $z$)}
+Il nodo $b$ diventa la nuova radice del sottoalbero. Il nodo $a$ rimane il figlio sinistro di $b$, mentre $c$ diventa il figlio destro di $b$. Inoltre, il sottoalbero destro di $b$ viene agganciato come nuovo sottoalbero sinistro di $c$.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/AVL/AVL_LL_rotation.png}
+    \label{fig:AVL_LL_rotation}
+\end{figure}
+
+
+\subsubsection{Caso Destra-Destra (RR)}
+Questo è il caso speculare. $y$ è il figlio destro di $z$ e $x$ è il figlio destro di $y$.
+\begin{itemize}
+    \item $z$: Nodo sbilanciato ($\beta(z) = -2$)
+    \item $y$: Figlio destro di $z$
+    \item $x$: Figlio destro di $y$
+\end{itemize}
+
+\paragraph{Soluzione: Rotazione Singola a Sinistra (su $z$)}
+Il nodo $b$ diventa la nuova radice del sottoalbero. Il nodo $a$ diventa il figlio sinistro di $b$, mentre $c$ rimane il figlio destro di $b$. Inoltre, il sottoalbero sinistro di $b$ viene agganciato come nuovo sottoalbero destro di $a$.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/AVL/AVL_RR_rotation.png}
+    \label{fig:AVL_RR_rotation}
+\end{figure}
+
+
+
+\subsection{Caso 3 e 4: Rotazioni Doppie (Casi Interni)}
+Si ha una rotazione doppia quando $x$, $y$ e $z$ formano un "gomito" (o "zig-zag").
+
+\subsubsection{Caso Sinistra-Destra (LR)}
+Questo caso si verifica quando $y$ è il figlio sinistro di $z$, ma $x$ è il figlio destro di $y$.
+
+\begin{itemize}
+    \item $z$: Nodo sbilanciato ($\beta(z) = +2$)
+    \item $y$: Figlio sinistro di $z$
+    \item $x$: Figlio \textbf{destro} di $y$
+\end{itemize}
+
+\paragraph{Soluzione: Doppia Rotazione (Sinistra-Destra)}
+È sempre $b$ a diventare la nuova radice del sottoalbero, con $a$ come figlio sinistro e $c$ come figlio destro. Inoltre, il sottoalbero sinistro di $b$ viene agganciato come nuovo sottoalbero destro di $a$, e il sottoalbero destro di $b$ viene agganciato come nuovo sottoalbero sinistro di $c$.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/AVL/AVL_LR_rotation.png}
+    \label{fig:AVL_LR_rotation}
+\end{figure}
+
+
+
+\subsubsection{Caso Destra-Sinistra (RL)}
+Questo è il caso speculare. $y$ è il figlio destro di $z$, ma $x$ è il figlio \textit{sinistro} di $y$.
+\begin{itemize}
+    \item $z$: Nodo sbilanciato ($\beta(z) = -2$)
+    \item $y$: Figlio destro di $z$
+    \item $x$: Figlio \textbf{sinistro} di $y$
+\end{itemize}
+
+\paragraph{Soluzione: Doppia Rotazione (Destra-Sinistra)}
+È sempre $b$ a diventare la nuova radice del sottoalbero, con $a$ come figlio sinistro e $c$ come figlio destro. Inoltre, il sottoalbero sinistro di $b$ viene agganciato come nuovo sottoalbero destro di $a$, e il sottoalbero destro di $b$ viene agganciato come nuovo sottoalbero sinistro di $c$.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/AVL/AVL_RL_rotation.png}
+    \label{fig:AVL_RL_rotation}
+\end{figure}
+
+
+
+\section{AVL Insert}
+L'inserimento in un albero AVL segue le stesse regole di un normale albero binario di ricerca, con l'aggiunta della necessità di mantenere l'equilibrio dell'albero. Dopo aver inserito un nuovo nodo, denotiamo questo nodo come $p$, e si risale lungo il cammino verso la radice, aggiornando i fattori di bilanciamento e applicando le rotazioni necessarie per ripristinare l'equilibrio al primo nodo $z$ che risulta essere non bilanciato.
+
+In particolare, in un albero AVL, l'applicazione di una singola ristrutturazione è sufficiente per ripristinare l'equilibrio dell'intero albero dopo un inserimento problematico.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/AVL/AVL_exInsertion.png}
+    \label{fig:AVL_exInsertion}
+\end{figure}
+
+
+\section{AVL Delete}
+La cancellazione in un albero AVL segue le stesse regole di un normale albero binario di ricerca, con l'aggiunta della necessità di mantenere l'equilibrio dell'albero. Dopo aver cancellato un nodo, denotiamo il padre del nodo cancellato come $p$, e si risale lungo il cammino verso la radice, aggiornando i fattori di bilanciamento e applicando le rotazioni necessarie per ripristinare l'equilibrio a ogni nodo $z$ che risulta essere non bilanciato.
+
+In particolare, in un albero AVL, può essere necessario eseguire fino a $O(\log n)$ ristrutturazioni per ripristinare l'equilibrio dell'intero albero dopo una cancellazione problematica.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/AVL/AVL_exDeletion.png}
+    \label{fig:AVL_exDeletion}
+\end{figure}
+
+
+\section{Analisi delle prestazioni}
+
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.92\textwidth]{immagini/AVL/AVL_complexity.png}
+    \label{fig:AVL_complexity}
+\end{figure}
+
+L'altezza di un albero AVL con n elementi è garantita essere $O(\log n)$. Poiché l'operazione standard di ricerca binaria su albero aveva tempi di esecuzione limitati dall'altezza e poiché il lavoro aggiuntivo per mantenere i fattori di bilanciamento e ristrutturare un albero AVL può essere limitato dalla lunghezza di un percorso nell'albero, le operazioni di mappatura tradizionali vengono eseguite nel caso peggiore in tempo logaritmico con un albero AVL.
+

@@ -1,0 +1,317 @@
+\chapter{Priority Queues}
+\label{cap:PriorityQueues}
+
+Una \textbf{coda con priorità} (\emph{Priority Queue}) è una struttura dati astratta fondamentale, simile a una coda standard (\emph{Queue}), ma con una differenza cruciale nel criterio di estrazione. Mentre una coda standard opera secondo la logica \textbf{FIFO} (First-In, First-Out), rimuovendo l'elemento che è in attesa da più tempo, una coda a priorità rimuove sempre l'elemento con la \textbf{priorità} più alta (o più bassa, a seconda di quale logica si vuole utilizzare), indipendentemente dall'ordine di inserimento. 
+
+È importante non confondere una coda a priorità con una mappa (Map) o dizionario. Lo scopo di una \textbf{Map} è l'associazione e la ricerca rapida: memorizza coppie $\langle Chiave, Valore \rangle$ e risponde efficientemente alla domanda: "Qual è il valore associato a questa specifica chiave?". Al contrario, lo scopo di una \textbf{Priority Queue} è l'estrazione efficiente dell'elemento più importante. Sebbene gli elementi in una coda a priorità siano spesso implementati come coppie, ad esempio $\langle Priorit\grave{a}, Dato \rangle$ (a cui spesso ci si riferisce comunque come (chiave, valore)), questa coppia ha una funzione diversa: la $Priorit\grave{a}$ non serve per cercare il $Dato$ (come farebbe una chiave in una mappa), ma serve solo alla struttura interna della coda (spesso uno \textit{Heap}) per determinare l'ordine di estrazione. In sintesi, si usa una mappa per \emph{trovare} un elemento tramite un identificatore unico (la chiave), mentre si usa una coda a priorità per \emph{estrarre} l'elemento con il grado di urgenza massimo o minimo.
+
+
+\paragraph{Definizione:} Una \textbf{Priority Queue} è una raccolta di elementi con priorità che consente l'inserimento arbitrario di elementi e la rimozione dell'elemento con priorità primaria. Quando un elemento viene aggiunto in una Priority Queue questo assume una determinata priorità rappresentata dalla chiave ad esso associata. L'elemento con la chiave minima sarà il successivo a essere rimosso dalla coda (quindi, a un elemento con chiave 1 verrà data priorità su un elemento con chiave 2).
+
+
+
+\section{Chiavi (Priorità)}
+In una Priority Queue, ogni elemento è associato a una chiave che determina la sua priorità. Le chiavi in una Priority Queue possono essere oggetti di qualunque tipo tale che sia possibile definire un ordinamento totale su di esse. Con tale generalità, le applicazioni possono sviluppare la propria nozione di priorità per ciascun elemento.
+
+A marcare la differenza con la struttura dati Map, in una Priority Queue \textbf{le chiavi non sono necessariamente uniche}. È possibile avere più elementi con la stessa chiave (priorità). In questi casi, la politica di estrazione per gli elementi con chiavi identiche può variare a seconda dell'implementazione specifica della Priority Queue. Alcune implementazioni potrebbero adottare una politica FIFO per gli elementi con la stessa priorità, mentre altre potrebbero non garantire alcun ordine specifico tra di essi.
+
+
+
+\section{Possibili implementazioni di Priority Queue}
+Esistono diverse strategie per implementare una Priority Queue. Due approcci semplici utilizzano liste (array o liste collegate) per memorizzare gli elementi, con differenze significative nelle prestazioni delle operazioni di inserimento e rimozione.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{immagini/PriorityQueues/array_based.png}
+    \label{fig:array_based}
+\end{figure}
+
+Le due strategie per implementare una Priority Queue ADT dimostrano un interessante compromesso. Quando si utilizza una lista non ordinata per memorizzare gli elementi, possiamo eseguire inserimenti in tempo O(1), ma trovare o rimuovere un elemento con chiave minima richiede un ciclo in tempo O(n) attraverso l'intera collezione. Al contrario, se si utilizza una lista ordinata, possiamo banalmente trovare o rimuovere l'elemento minimo in tempo O(1), ma aggiungere un nuovo elemento alla coda potrebbe richiedere tempo O(n) per ripristinare l'ordinamento.
+
+Esistono però implementazioni più efficienti, seppur più complesse, che consentono di eseguire sia inserimenti che rimozioni in tempo logaritmico. Una di queste implementazioni si basa su una struttura dati chiamata \textbf{heap binario}, la quale utilizza la struttura di un albero binario per trovare un compromesso tra elementi completamente non ordinati e perfettamente ordinati.
+
+
+
+\section{Heap}
+\paragraph{Definizione:}Un \textbf{Heap} è un albero binario che soddisfa le seguenti proprietà:
+\begin{itemize}
+    \item \textbf{Albero binario completo}: L'albero è un albero binario completo (vedi pag.6), cioè tutti i livelli dell'albero sono completamente riempiti, tranne eventualmente l'ultimo livello, che è riempito da sinistra a destra.
+        \begin{itemize}
+            \item Sia $h$ l'altezza dell'albero, per $i = 0, 1, \ldots, h-1$, il livello $i$-esimo contiene esattamente $2^i$ nodi. Se il livello $h-1$ (cioè nel livello più basso) non è pieno, tutti i suoi nodi sono riempiti da sinistra a destra.
+        \end{itemize}
+    \item \textbf{Heap-Order}: Per ogni posizione (nodo) $p$, la chiave di $p$ è minore o uguale alle chiavi dei suoi figli. 
+        \begin{itemize}
+            \item Questo implica che la chiave minima si trova sempre nella radice dell'albero.
+        \end{itemize}
+\end{itemize}
+Dal momento che un Heap è un albero binario completo, la sua altezza è sempre logaritmica rispetto al numero di nodi nell'albero. Questo fatto è cruciale per garantire che le operazioni di inserimento e rimozione possano essere eseguite in tempo $O(\log n)$.
+Si ha quindi: 
+\[
+h = \lfloor \log_2(n) \rfloor
+\]
+
+
+
+\section{Implementazione di una Priority Queue attraverso Heap}
+Un Heap può essere efficacemente utilizzato per implementare una Priority Queue, sfruttando le sue proprietà di albero binario completo e heap-order. Le operazioni principali di una Priority Queue, ovvero l'inserimento di un elemento e la rimozione dell'elemento con priorità minima, possono essere eseguite in tempo logaritmico grazie alla struttura dell'Heap.
+
+\begin{itemize}
+    \item In ogni nodo dello Heap viene memorizzata una coppia chiave-valore, dove la chiave rappresenta la priorità dell'elemento.
+    \begin{itemize}
+        \item N.B.: è possibile avere più nodi con la stessa chiave, in quanto si tratta di un'implementazione di una Priority Queue.
+    \end{itemize}
+    \item Manteniamo un riferimento all'ultimo nodo dello Heap, cioè il nodo più a destra sull'ultimo livello dell'albero.
+\end{itemize}
+
+
+\clearpage
+\subsection*{Inserimento \texttt{add(k,v)}}
+Si vuole inserire una nuova coppia chiave-valore (k, v) nell'Heap. Per mantenere la proprietà di albero binario completo, dobbiamo inserire il nuovo nodo nella posizione corretta, ovvero appena oltre il nodo più a destra al livello più basso dell'albero, o come posizione più a sinistra di un nuovo livello, se il livello più basso è già pieno (o se l'heap è vuoto).
+
+La posizione del nodo nel quale inserire il nuovo elemento può essere trovato in un tempo $O(\log n)$ a partire dal riferimento all'ultimo nodo:
+\begin{itemize}
+    \item Si parte dal riferimento all'ultimo nodo.
+    \item Si risale l'albero fino alla radice o ad un nodo che è figlio sinistro del suo genitore.
+    \item Se il nodo in cui si è giunti è il figlio sinistro del suo genitore, vai al nodo fratello.
+    \item Infine, scendi sempre a sinistra fino a raggiungere un nodo foglia (None). Questa sarà la posizione in cui inserire il nuovo nodo.
+\end{itemize}
+
+
+
+\subsection*{Up-Heap Bubbling dopo l'inserimento}
+Dopo aver inserito il nuovo nodo nella posizione corretta al fine di mantenere la proprietà di albero binario completo, è possibile che la proprietà di heap-order venga violata, poiché la chiave del nuovo nodo potrebbe essere minore della chiave del suo genitore. Per ripristinare la proprietà di heap-order, si esegue un processo chiamato \textbf{up-heap bubbling}.
+
+\begin{itemize}
+    \item Partendo dal nuovo nodo con chiave $k$, e risalendo l'albero verso la radice, si scambia il nodo corrente con il suo genitore fino a quando la heap-order property non è ristabilita.
+    \item L'algoritmo termina quando la chiave $k$ raggiunge la radice dell'albero o quando la chiave $k$ si trova in un nodo il cui padre ha una chiave minore o uguale a $k$.
+\end{itemize}
+Dal momento che l'altezza dell'Heap è $O(\log n)$, l'operazione di up-heap bubbling richiede un tempo $O(\log n)$ nel caso peggiore.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/PriorityQueues/up_heap_bubbling.png}
+    \label{fig:up_heap_bubbling}
+\end{figure}
+
+
+
+\clearpage
+\subsection*{Cancellazione \texttt{remove\_min()}}
+Il metodo \texttt{remove\_min()} rimuove e restituisce l'elemento con la chiave minima dalla Priority Queue. In un Heap, l'elemento con la chiave minima si trova sempre nella radice dell'albero. Per mantenere la proprietà di albero binario completo dopo la rimozione della radice, dobbiamo sostituire la radice con l'ultimo nodo dell'Heap (cioè il nodo più a destra nell'ultimo livello dell'albero) e poi rimuovere l'ultimo nodo.
+
+
+\subsection*{Down-Heap Bubbling dopo la cancellazione}
+Dopo aver effettuato la sostituzione della radice con l'ultimo nodo, è possibile che la proprietà di heap-order venga violata, poiché la chiave del nuovo nodo radice potrebbe essere maggiore della chiave di uno o entrambi i suoi figli. Per ripristinare la proprietà di heap-order, si esegue un processo chiamato \textbf{down-heap bubbling}.
+
+\begin{itemize}
+    \item Partendo dalla radice, si scambia il nodo corrente con il figlio che ha la chiave minima, a condizione che la chiave del figlio sia minore della chiave del nodo corrente.
+    \item Questo processo continua fino a quando la chiave del nodo corrente è minore o uguale alle chiavi dei suoi figli, o fino a quando il nodo corrente diventa un nodo foglia (None), per cui la heap-order property è ristabilita.
+\end{itemize}
+Dal momento che l'altezza dell'Heap è $O(\log n)$, l'operazione di down-heap bubbling richiede un tempo $O(\log n)$ nel caso peggiore.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/PriorityQueues/down_heap_bubbling.png}
+    \label{fig:down_heap_bubbling}
+\end{figure}
+
+
+\clearpage
+\section{Implementazione Array-based di un Heap}
+È sempre possibile rappresentare un albero binario utilizzando un array, sfruttando la relazione tra gli indici dei nodi genitori e figli. In generale questa rappresentazione è meno efficiente in termini di spazio rispetto a una rappresentazione basata su nodi collegati, poiché richiede spazio per tutti i nodi, compresi quelli vuoti. 
+
+Tuttavia, per un albero binario \emph{completo} come un Heap, questa rappresentazione è particolarmente efficiente, poiché non ci sono nodi vuoti tra i nodi effettivamente presenti nell'albero. Sia $n$ il numero di nodi nell'albero, nel caso di un albero binario qualsiasi l'array può avere nel caso peggiore $N = 2^n -1$ elementi, mentre nel caso di albero binario completo l'array avrà esattamente $N = n$ elementi.
+
+\vspace{1\baselineskip}
+Questo procedimento vale per ogni albero binario, ma è particolarmente efficiente per un Heap, poiché l'albero è completo. La mappatura tra i nodi dell'albero e gli indici dell'array avviene seguendo queste regole:
+
+\begin{itemize}
+
+    \item Il nodo radice dell'albero viene memorizzato all'indice 0 dell'array.
+    \item Per un nodo situato all'indice $i$ nell'array:
+    \begin{itemize}
+        \item Il figlio sinistro del nodo si trova all'indice $2i + 1$.
+        \item Il figlio destro del nodo si trova all'indice $2i + 2$.
+        \item Il genitore del nodo si trova all'indice $\lfloor (i - 1) / 2 \rfloor$, a condizione che $i > 0$.
+    \end{itemize}
+\end{itemize}
+
+\begin{figure}[ht!]
+    \centering % Centra l'intera figura
+    
+    % --- Prima Immagine (a) ---
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{immagini/PriorityQueues/heap_example.png}
+        \caption{Esempio di uno Heap con 13 elementi. L'ultima posizione è occupata dal nodo con chiave 13.}
+        \label{fig:heap_example}
+    \end{subfigure}
+    % --- Seconda Immagine (b) ---
+    \begin{subfigure}{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{immagini/PriorityQueues/heap_array.png}
+        \caption{Sua rappresentazione come array. }
+        \label{fig:heap_array}
+    \end{subfigure}
+    
+    \label{fig:figura_completa}
+\end{figure}
+
+
+\clearpage
+\section{Analisi delle prestazioni}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{immagini/PriorityQueues/complexity.png}
+    \label{fig:complexity}
+\end{figure}
+
+In figura sono riassunte le complessità temporali delle operazioni principali di una Priority Queue implementata tramite un Heap binario, assumendo che due chiavi possano essere confrontate in tempo costante $O(1)$, e che l'Heap sia implementato come array-based o linked-based tree. L'analisi è basata sulle seguenti considerazioni:
+\begin{itemize}
+    \item L'Heap ha $n$ nodi, ognuno dei quali contiene una coppia chiave-valore.
+    \item L'altezza dell'Heap è $O(\log n)$ [In particolare, $h = \lfloor \log_2 n \rfloor$], dal momento che si tratta di un albero binario completo.
+    \item L'operazione \texttt{min()} viene eseguita in $O(1)$ perché la radice dell'albero contiene tale elemento.
+    \item Nel caso peggiore, up-heap e down-heap eseguono un numero di scambi pari all'altezza dell'Heap.
+\end{itemize}
+
+Concludiamo che la struttura dati Heap è una realizzazione molto efficiente dell'ADT Priority Queue, indipendentemente dal fatto che l'heap sia implementato come array-based o linked-based tree. L'implementazione basata su heap raggiunge tempi di esecuzione rapidi sia per l'inserimento che per la rimozione, a differenza delle implementazioni basate sull'utilizzo di una sorted-list o unsorted-list.
+
+
+
+\section{Costruzione di un Heap da una lista di elementi: Heapify}
+A partire da un Heap vuoto, $n$ inserimenti successivi al suo interno richiederebbero un tempo complessivo di $O(n \log n)$, poiché ogni inserimento richiede un tempo $O(\log n)$. Tuttavia, se le $n$ coppie chiave-valore sono note a prescindere, esiste un algoritmo più efficiente chiamato \textbf{Heapify} che consente di costruire un Heap a partire da una lista di $n$ elementi in tempo lineare $O(n)$.
+
+\subsection*{Fusione di due Heap}
+Supponiamo di avere due Heap della stessa altezza $h$, e un nuovo elemento con chiave $k$. Vogliamo creare un nuovo Heap di altezza $h + 1$ che contenga tutti gli elementi dei due Heap e l'elemento con chiave $k$. Per fare ciò, possiamo seguire questi passaggi:
+\begin{itemize}
+    \item Creiamo un nuovo nodo radice con chiave $k$.
+    \item Assegniamo i due Heap esistenti come figli sinistro e destro della nuova radice.
+    \item Eseguiamo l'operazione di down-heap bubbling a partire dalla radice per ripristinare la proprietà di heap-order.
+\end{itemize}
+
+\subsection*{Heapify}
+Per semplicità ipotizziamo che il numero di elementi $n$ sia un intero tale che $n = 2^{h+1} - 1$ per qualche intero $h \geq 0$, in modo che l'Heap risultante sia un albero binario completo, con anche l'ultimo livello completamente pieno, per cui l'Heap ha altezza $h = \log_2(n+1) - 1$. L'algoritmo Heapify può essere visto come una sequenza di $h + 1 = \log_2(n + 1)$ step [dato dal fatto che in un albero di altezza $h$ ci sono $h + 1$ livelli, numerati da 0 a $h$]:
+
+\begin{itemize}[labelwidth=!, leftmargin=*, align=right]
+    \item[1.] Nel primo step (Figura 9.5b), costruiamo $(n+1)/2$ Heap di altezza 0 (cioè nodi singoli).
+
+    \item[2.] Nel secondo step (Figura 9.5c-d), costruiamo $(n+1)/4$ Heap di altezza 1, ciascuno contenente tre nodi, unendo coppie di Heap elementari (ottenuti al passo precedente) e aggiungendo un nuovo elemento. Il nuovo nodo viene posizionato alla radice e potrebbe dover essere scambiato con un elemento figlio per preservare la heap-order property.
+
+    \item[3.] Nel terzo step (Figura 9.5e-f), costruiamo $(n+1)/8$ Heap di altezza 2, ciascuno contenente sette nodi, unendo coppie di Heap (ottenuti al passo precedente) e aggiungendo un nuovo elemento. Il nuovo nodo viene posizionato alla radice e potrebbe dover essere scambiato attraverso un down-heap bubbling per preservare la heap-order property.
+    
+    \item[$\vdots$]
+
+    \item[i.] Nel generico $i$-esimo step, con $2 \le i \le h$, costruiamo $(n+1)/2^i$ Heap di altezza $i-1$, ciascuno contenente $2^i - 1$ nodi, unendo coppie di Heap (ottenuti al passo precedente) e aggiungendo un nuovo elemento. Il nuovo nodo viene posizionato alla radice e potrebbe dover essere scambiato attraverso un down-heap bubbling per preservare la heap-order property.
+
+    \item[$\vdots$]
+
+    \item[$h+1$.] Nell'ultimo step (Figura 9.5g-h), costruiamo un singolo Heap di altezza $h$, contenente tutti e $n$ gli elementi, unendo gli ultimi due Heap che risultano essere di $(n - 1)/2$ elementi e di altezza $h - 1$ (ottenuti al passo precedente) e aggiungendo un nuovo elemento. Il nuovo nodo viene posizionato alla radice e potrebbe dover essere scambiato attraverso un down-heap bubbling per preservare la heap-order property.
+\end{itemize}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/PriorityQueues/heapify.png}
+    \caption{Costruzione bottom-up di un Heap con 15 elementi: (a, b) iniziamo costruendo Heap elementari di un solo elemento; (c, d) combiniamo questi Heap in Heap di 3 elementi, e poi (e, f) in Heap di 7 elementi, fino a (g, h) dove otteniamo l'Heap finale di 15 elementi. Il path del down-heap bubbling è evidenziato in (d, f, h). Per semplicità è mostrata solamente la chiave in ogni nodo anziché la coppia chiave-valore.}
+    \label{fig:heapify}
+\end{figure}
+
+\clearpage
+\section{Heap-Sort}
+L'algoritmo \textbf{Heap-Sort} sfrutta la struttura dati Heap: data la lista di partenza, inserisco tutti gli elementi in un \textbf{Max-Heap} (al fine di avere gli elementi in ordine crescente alla fine dell'algoritmo) e poi estraggo ripetutamente l'elemento massimo (la radice del Max-Heap) per costruire la lista ordinata. Questo algoritmo viene eseguito già in tempo $O(n \log n)$, poiché l'inserimento di $n$ elementi in un Heap richiede un tempo $O(n)$ (grazie all'algoritmo Heapify) e ogni estrazione dell'elemento massimo richiede un tempo $O(\log n)$, per un totale di $n$ estrazioni.
+
+\subsection*{L'idea per un ordinamento in-place}
+L'algoritmo che presentiamo di seguito è una versione più raffinata dello stesso Heap-sort che anziché utilizzare memoria aggiuntiva permette di avere un \textbf{ordinamento in-place} (cioè occupa al più memoria aggiuntiva $O(1)$) dell'Heap-sort.
+
+L'idea chiave è dividere l'array $C$ in due parti contigue:
+\begin{enumerate}
+    \item \textbf{La parte sinistra (Heap):} Da $C[0]$ a $C[i-1]$.
+    \item \textbf{La parte destra (Sequenza):} Da $C[i]$ a $C[n-1]$.
+\end{enumerate}
+Durante l'algoritmo, il confine $i$ tra queste due parti si sposta.
+
+\clearpage
+\subsection*{Fase 1: costruzione di un Max Heap}
+\textbf{Obiettivo:} Trasformare l'array $C$ in un unico Max-Heap.
+
+In questa fase, si parte da un heap vuoto e si sposta il confine $i$ \textbf{da sinistra verso destra}, da $1$ a $n$. La parte sinistra (l'Heap) cresce, mentre la parte destra (la Sequenza di input) si riduce.
+
+Per ogni passo $i$, da $i=1$ fino a $n$:
+\begin{enumerate}
+    \item \textbf{Azione (Espansione):} Il confine si sposta. L'elemento $C[i-1]$ (il primo della Sequenza) viene aggiunto all'Heap, diventandone l'ultima foglia.
+    \item \textbf{Aggiustamento (Up-Heap Bubbling):} L'aggiunta di $C[i-1]$ potrebbe violare la proprietà del Max-Heap. Si esegue quindi un \textbf{Up-Heap Bubbling} a partire da $C[i-1]$. Questo elemento viene scambiato con il suo genitore finché non è più piccolo del genitore o non raggiunge la radice $C[0]$.
+\end{enumerate}
+
+Alla fine della Fase 1, $i=n$. La parte Heap occupa l'intero array $C[0 \dots n-1]$ e la Sequenza è vuota. L'intero array è ora un Max-Heap valido.
+
+\subsection*{Fase 2: estrazione degli elementi in ordine}
+\textbf{Obiettivo:} Estrarre gli elementi dall'Heap in ordine decrescente per costruire l'array ordinato.
+
+In questa fase, si parte con tutti gli elementi nell'Heap e la Sequenza vuota. Si sposta il confine \textbf{da destra verso sinistra}.
+
+Per ogni passo $i$, da $i=1$ fino a $n$:
+\begin{enumerate}
+    \item \textbf{Azione (Estrazione):} L'elemento massimo dell'Heap si trova sempre alla radice, $C[0]$. Questo elemento deve essere spostato nella sua posizione ordinata finale, che in questo passo è $C[n-i]$ (la prima posizione libera a sinistra della Sequenza ordinata). Si \textbf{scambiano} $C[0]$ e $C[n-i]$.
+    \item \textbf{Aggiustamento (Down-Heap Bubbling):} Dopo lo scambio, $C[n-i]$ contiene il massimo ed è ora "bloccato" (fa parte della Sequenza ordinata). L'Heap si è ridotto (ora va da $C[0]$ a $C[n-i-1]$). L'elemento che è finito in $C[0]$ (quello che era $C[n-i]$) è probabilmente fuori posto e viola la proprietà del max-Heap. Si esegue quindi un \textbf{Down-Heap Bubbling} a partire dalla radice $C[0]$. Questo elemento "scende" scambiandosi con il suo figlio \textit{maggiore}, finché non è più grande di entrambi i figli o non raggiunge una foglia dell'Heap.
+\end{enumerate}
+
+Alla fine della Fase 2, $i=n$. La parte "Heap" è vuota e la "Sequenza" (ora ordinata in senso crescente) occupa l'intero array.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/PriorityQueues/heap_sort.png}
+    \caption{Fase 2 di un Heap-Sort in-place. La porzione Heap è evidenziata in grigio all'interno dell'array, per ogni iterazione dell'algoritmo. L'albero binario equivalente alla porzione Heap per ogni iterazione è rappresentato graficamente con il percorso più recente di Down-Heap Bubbling evidenziato.}
+    \label{fig:heap_sort}
+\end{figure}
+
+
+
+\clearpage
+\section{Adaptable Priority Queue}
+L'ADT Priority Queue è sufficiente per molte applicazioni, ma in alcuni casi è indispensabile avere delle funzionalità aggiuntive per gestire in modo più flessibile gli elementi all'interno della coda, per esempio modificare la chiave (priorità) di un elemento esistente o rimuovere un elemento specifico (non necessariamente quello con priorità minima). Per questo motivo, presentiamo una variante chiamata \textbf{Adaptable Priority Queue} che estende l'ADT Priority Queue con queste funzionalità aggiuntive.
+
+\subsection*{Locators}
+Per poter implementare in modo efficiente le nuove operazioni di modifica e cancellazione, è necessario trovare un meccanismo che ci permetta di trovare uno specifico elemento all'interno della coda senza dover scorrere l'intera struttura dati. Per questo motivo, quando un elemento viene inserito nella coda, viene restituito uno speciale oggetto chiamato \textbf{locator} al chiamante. Di conseguenza, ogni volta che si desidera modificare o rimuovere un elemento specifico di una coda a priorità $P$ è necessario utilizzare il locator associato a quell'elemento per accedervi direttamente.
+
+\vspace{1\baselineskip}
+\noindent
+\begin{tabularx}{\textwidth}{@{} r @{ : } X @{}}
+    % La colonna 1 è 'r' (left-aligned)
+    % La colonna 2 è 'X' (testo con a-capo automatico)
+    % '@{ : }' inserisce i due punti allineati tra le colonne
+
+    \texttt{P.update(loc, k, v)} & Sostituisce la chiave $k$ e il valore $v$ dell'elemento associato al locator $loc$ nella coda a priorità $P$. \\
+
+    \texttt{P.remove(loc)} & Rimuove l'elemento associato al locator $loc$ dalla coda a priorità $P$ e lo restituisce. \\
+\end{tabularx}
+
+\vspace{1\baselineskip}
+\noindent
+L'astrazione del \emph{locator} è in qualche modo simile all'astrazione della \emph{position}. Tuttavia, facciamo una distinzione tra un locator e una position perché un locator per una coda prioritaria non rappresenta una collocazione tangibile di un elemento all'interno della struttura. Nella nostra coda prioritaria, un elemento può essere ricollocato all'interno della nostra struttura dati durante un'operazione che non sembra direttamente rilevante per quell'elemento. \uline{Un locator per un elemento rimarrà valido fintanto che quell'elemento rimarrà da qualche parte nella coda}.
+
+\subsection*{Implementazione di un Adaptable Priority Queue}
+L'implementazione della classe Locator estende la classe \_Item dell'ADT Priority Queue per includere un campo aggiuntivo che tiene traccia della posizione corrente dell'elemento all'interno della rappresentazione basata su array del nostro Heap. Questo campo aggiuntivo consente di accedere rapidamente alla posizione dell'elemento nell'Heap, facilitando le operazioni di aggiornamento e rimozione, come mostrato Nella Figura \ref{fig:locator1}.
+
+\clearpage
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/PriorityQueues/locator1.png}
+    \caption{Rappresentazione di un Heap utilizzando una sequenza di Locator. Il terzo elemento di ciascuna istanza di Locator corrisponde all'indice dell'elemento all'interno dell'array. Si presume che l'identificatore "token" sia un riferimento al localizzatore nello scope dell'utente.}
+    \label{fig:locator1}
+\end{figure}
+
+La lista è una sequenza di riferimenti a istanze di Locator, ognuna delle quali memorizza una chiave, un valore, e l'indice corrente dell'elemento all'interno dell'array che rappresenta l'Heap. All'utente verrà fornito un riferimento al Locator corrispondente per ciascun elemento inserito, come illustrato dall'identificatore "token" nella Figura \ref{fig:locator1}.
+
+Quando eseguiamo delle operazioni sulla Priority Queue che potrebbero alterare la posizione di un elemento all'interno dell'Heap (come l'inserimento che comporta un Up-Heap Bubbling, la rimozione che comporta un Down-Heap Bubbling o l'aggiornamento della chiave), dobbiamo assicurarci di aggiornare il campo dell'indice all'interno del Locator corrispondente. Questo garantisce che il Locator rimanga valido e punti sempre alla posizione corretta dell'elemento nell'Heap. 
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/PriorityQueues/locator2.png}
+    \caption{È possibile osservare lo stato dell'Heap dopo aver eseguito una \texttt{remove\_min()}. Questa operazione causa un Down-Heap Bubbling che ricolloca gli elementi all'interno dell'Heap, e di conseguenza aggiorna gli indici nei Locator associati agli elementi coinvolti nel bubbling.}
+    \label{fig:locator2}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{immagini/PriorityQueues/complexity_APQ.png}
+    \label{fig:complexity_APQ}
+\end{figure}

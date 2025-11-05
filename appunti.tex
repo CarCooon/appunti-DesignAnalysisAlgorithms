@@ -1,0 +1,133 @@
+% --- PREAMBOLO ---
+
+% Definisce il tipo di documento (articolo, report, book, letter, ecc.)
+% a4paper imposta la pagina in formato A4, 12pt la dimensione del font
+\documentclass[a4paper, 11pt]{book}
+
+% --- Font Times New Roman e lingua---
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage[normalem]{ulem}
+
+\usepackage{newtxtext,newtxmath}
+\usepackage{microtype}
+
+% --- STILE DELL'INDICE ---
+\makeatletter
+% capitolo, livello 0: indentazione 0em, larghezza numero 1.5em
+\renewcommand*\l@chapter{\@dottedtocline{0}{0em}{1.5em}}
+% sezione, livello 1: indentazione 1.5em, larghezza numero 2.3em
+\renewcommand*\l@section{\@dottedtocline{1}{1.5em}{2.3em}}
+% sottosezione, livello 2: indentazione 3.8em, larghezza numero 3.2em
+\renewcommand*\l@subsection{\@dottedtocline{2}{3.8em}{3.2em}}
+\makeatother
+
+
+
+% rinomina "Indice" in "Sommario"
+\addto\captionsitalian{
+  \renewcommand{\contentsname}{Sommario}
+}
+
+
+
+% --- Impaginazione ---
+\usepackage[margin=3cm,bindingoffset=0.5cm]{geometry}
+\usepackage{setspace}
+\setstretch{1.2}
+\setlength{\parindent}{1cm}
+
+% --- Figure, tabelle ---
+\usepackage{graphicx}
+\graphicspath{{./}{./immagini/}} % cerca immagini anche in ./immagini
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{tabularx,booktabs}
+\usepackage{enumitem}
+\usepackage{amsmath}
+
+
+% --- Bibliografia ---
+\usepackage[backend=biber,sorting=none,style=numeric]{biblatex}
+\addbibresource{bib.bib}
+\usepackage{csquotes}
+
+% --- Numerazione e intestazioni ---
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[C]{\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0pt}
+}
+
+\usepackage[bottom]{footmisc}
+\setlength{\skip\footins}{8pt plus 2pt minus 1pt}
+
+% --- Link e riferimenti ---
+\usepackage[hidelinks]{hyperref}
+\usepackage{cleveref}
+
+% --- INFORMAZIONI SUL DOCUMENTO ---
+\title{Alberi}
+\author{Carmine}
+\date{\today} % \today inserisce la data di compilazione. Puoi anche scrivere una data fissa, es. "Ottobre 2025"
+
+
+
+% --- CORPO DEL DOCUMENTO ---
+\begin{document}
+
+% ================= FRONTESPIZIO =================
+\begin{titlepage}
+    \begin{center}
+        \huge{\uppercase{Università degli Studi di Salerno}}\\[10mm]
+        \uppercase{\normalsize DIPARTIMENTO DI INGEGNERIA DELL'INFORMAZIONE ED ELETTRICA\\ E MATEMATICA APPLICATA}\\[15mm]
+        \normalsize{Corso: \\DESIGN AND ANALYSIS OF ALGORITHMS}\\[20mm]
+        \includegraphics[width=0.35\textwidth]{immagini/logo_unisa}\\[20mm]
+        \textbf{\large APPUNTI}\\[10mm]
+    \end{center}
+
+    \begin{center}
+        \Large{\textbf{Carmine Terracciano}}\\[2mm]
+        \large{Mat. IE22700109}\\[10mm]
+    \end{center}
+
+    \vfill
+    \begin{center}
+        \large \uppercase{Anno Accademico 2025/2026}
+    \end{center}
+\end{titlepage}
+
+% Crea un sommario/indice
+\tableofcontents
+
+
+% --- INIZIO DEL CONTENUTO ---
+\cleardoublepage
+\input{capitoli/cap1_BST}
+
+\cleardoublepage
+\input{capitoli/cap2_AVL}
+
+\cleardoublepage
+\input{capitoli/cap3_MWST}
+
+\cleardoublepage
+\input{capitoli/cap4_RBT}
+
+\cleardoublepage
+\input{capitoli/cap5_HashTables}
+
+\cleardoublepage
+\input{capitoli/cap6_PriorityQueues}
+
+
+% Questo comando segna la fine del documento
+\end{document}

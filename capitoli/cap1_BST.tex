@@ -1,0 +1,147 @@
+\chapter{Binary Search Tree (BST)}
+\label{cap:BST}
+
+\paragraph{Definizione:} La struttura dati \textbf{albero binario di ricerca (BST)} è un albero binario i cui nodi contengono elementi del tipo chiave-valore, e soddisfa le seguenti proprietà:
+\begin{itemize}
+    \item La chiave di ogni nodo è maggiore di tutte le chiavi nel suo sottoalbero sinistro.
+    \item La chiave di ogni nodo è minore di tutte le chiavi nel suo sottoalbero destro.
+    \item Tutti i nodi esterni non contengono elementi e sono considerati come nodi nulli (None) o nodi foglia.
+\end{itemize}
+Questa struttura (che non ammette chiavi duplicate) consente di eseguire le operazioni fondamentali di ricerca, inserimento e cancellazione in tempo proporzionale all'altezza dell'albero ($O(h)$).
+
+
+
+\section{BST Insert}
+L'inserimento di una coppia chiave-valore \emph{(k, v)} in un BST avviene seguendo questi passaggi:
+\begin{itemize}
+    \item Per prima cosa si esegue una ricerca per la chiave k nell'albero, per verificare se k esiste già nell'albero o in alternativa per trovare la posizione corretta per l'inserimento.
+        \begin{itemize}
+            \item Partendo dalla radice, si confronta k con la  chiave del nodo corrente:
+            \item Se k è minore, si procede nel sottoalbero sinistro.
+            \item Se k è maggiore, si procede nel sottoalbero destro.
+            \item Questo processo continua fino a raggiungere un nodo \emph{p} che sarà il padre del nuovo nodo o fino a trovare k.
+        \end{itemize}
+    \item Se k è già presente, si aggiorna il valore associato a k con v.
+    \item Se k non è presente, si crea un nuovo nodo con la coppia (k, v) e lo si inserisce come figlio di p.
+        \begin{itemize}
+            \item Se k < p.key(), il nuovo nodo viene inserito come figlio sinistro di p.
+            \item Se k > p.key(), viene inserito come figlio destro di p.
+        \end{itemize}
+\end{itemize}
+
+
+
+\section{BST Delete}
+Per prima cosa si esegue una ricerca per la chiave k per verificare che k esista nell'albero. 
+\begin{itemize}
+    \item Se k non è presente, l'operazione termina senza modifiche all'albero.
+    \item Se k è presente, si procede con la cancellazione facendo una distinzione tra due casi:
+        \begin{itemize}
+            \item Il nodo da cancellare ha al massimo un figlio.
+            \item Il nodo da cancellare ha due figli.
+        \end{itemize}
+\end{itemize}
+
+\subsection{Cancellazione di un nodo con al massimo un figlio}
+In questo caso, possiamo semplicemente rimuovere il nodo da cancellare \emph{p} e collegare il suo unico figlio \emph{r} (se esiste) al padre.
+
+\begin{figure}[h!]
+    % Comando per centrare l'immagine
+    \centering
+    
+    % Il comando principale per includere l'immagine
+    \includegraphics[width=1\textwidth]{immagini/BST/BST_del_case1.png}
+    % [width=1\textwidth] ridimensiona l'immagine al 100% della larghezza del testo.
+
+    % Aggiunge un'etichetta per riferimenti incrociati
+    \label{fig:BST_del_case1}
+\end{figure}
+
+\subsection{Cancellazione di un nodo con due figli}
+In questo caso, dobbiamo trovare un nodo sostituto per mantenere le proprietà del BST. Il nodo sostituto può essere (arbitrariamente) il \emph{successore} (il nodo con la chiave più piccola [il nodo più a sinistra] nel sottoalbero destro) o il \emph{predecessore} (il nodo con la chiave più grande [il nodo più a destra] nel sottoalbero sinistro). 
+
+Ipotizziamo di utilizzare il predecessore: \emph{r = before(p)}. Una volta trovato il nodo sostituto \emph{r}, copiamo la sua chiave e valore nel nodo da cancellare \emph{p} e poi cancelliamo il nodo \emph{r}, che avrà al massimo un figlio (quello sinistro) in quanto è il nodo più a destra nel sottoalbero sinistro. Dunque, dopo aver scambiato i valori, possiamo procedere con la cancellazione di \emph{r} come nel primo caso, collegando il suo figlio (se esiste) al padre di \emph{r}.
+
+\begin{figure}[t]
+    % Comando per centrare l'immagine
+    \centering
+    
+    % Il comando principale per includere l'immagine
+    \includegraphics[width=1\textwidth]{immagini/BST/BST_del_case2.png}
+    % [width=1\textwidth] ridimensiona l'immagine al 100% della larghezza del testo.
+
+    % Aggiunge un'etichetta per riferimenti incrociati
+    \label{fig:BST_del_case2}
+\end{figure}
+
+
+
+\section{Analisi delle prestazioni}
+\begin{figure}[h!]
+    % Comando per centrare l'immagine
+    \centering
+    
+    % Il comando principale per includere l'immagine
+    \includegraphics[width=1\textwidth]{immagini/BST/BST_complexity.png}
+    % [width=1\textwidth] ridimensiona l'immagine al 100% della larghezza del testo.
+
+    % Aggiunge un'etichetta per riferimenti incrociati
+    \label{fig:BST_complexity}
+\end{figure}
+
+Un BST è un'implementazione efficiente di un Map solo quando la sua altezza $h$ è piccola. Partiamo dalla relazione che lega il numero di nodi $n$ all'altezza $h$ nel caso migliore (un albero completo). Un albero di altezza $h$ può contenere al massimo $2^{h+1} - 1$ nodi.
+
+Quindi, per contenere $n$ nodi, l'altezza $h$ deve soddisfare:
+% Usiamo l'ambiente align* per allineare le equazioni
+\begin{align*}
+    n & \le 2^{h+1} - 1  && \text{(Nodi massimi per altezza $h$)} \\
+    n + 1 & \le 2^{h+1}       && \text{(Aggiungo 1 a entrambi i lati)} \\
+    \log_2(n+1) & \le \log_2(2^{h+1}) && \text{(Applico $\log_2$ a entrambi i lati)} \\
+    \log_2(n+1) & \le h + 1       && \text{(Semplifico $\log_2(2^x) = x$)} \\
+    \log_2(n+1) - 1 & \le h         && \text{(Sottraggo 1)}
+\end{align*}
+Dato che $h$ deve essere il più piccolo intero che soddisfa questa disequazione, applichiamo la funzione \textbf{ceiling} (soffitto, $\lceil \dots \rceil$) al lato sinistro:
+\[
+h = \lceil \log_2(n+1) - 1 \rceil
+\]
+Che è matematicamente equivalente a scrivere:
+\[
+h = \lceil \log_2(n+1) \rceil - 1
+\]
+
+Per definizione, la funzione \textbf{floor} (pavimento, $\lfloor \dots \rfloor$) restituisce l'unico intero $h$ che soddisfa $h \le x < h+1$.
+Di conseguenza, possiamo scrivere direttamente:
+\[
+h = \lfloor \log_2(n) \rfloor
+\]
+
+
+
+\section{Richiami: Tipi di alberi binari}
+Esistono diverse definizioni precise per classificare gli alberi binari in base alla loro struttura e al loro bilanciamento. 
+Queste distinzioni sono fondamentali, perché la forma dell'albero determina l'efficienza delle operazioni su di esso.\footnote{
+    Ecco le definizioni chiave (spesso confuse tra loro) dei vari tipi di alberi:
+    
+    \begin{itemize}
+        \item \textbf{Albero Binario Pieno (Full Binary Tree):} 
+        Un albero in cui ogni nodo ha \textbf{zero o due figli}. Non sono ammessi nodi con un solo figlio.
+        
+        \item \textbf{Albero Binario Perfetto (Perfect Binary Tree):}
+        Un albero \textit{pieno} in cui tutte le \textbf{foglie si trovano allo stesso livello} (stessa profondità). È la forma ``perfetta'' che massimizza il numero di nodi per una data altezza $h$.
+        
+        \item \textbf{Albero Binario Completo (Complete Binary Tree):}
+        Un albero in cui tutti i livelli, \textbf{tranne eventualmente l'ultimo}, sono completamente pieni. Se l'ultimo livello non è pieno, i suoi nodi sono ``impacchettati'' il più possibile a sinistra. Questa è la struttura usata dagli \textit{Heap}.
+        
+        \item \textbf{Albero Bilanciato (Balanced Binary Tree):}
+        Termine generico per un albero la cui altezza è garantita essere $O(\log n)$. Esistono diverse definizioni specifiche:
+        \begin{itemize}
+            \item \textbf{Bilanciato in altezza (es. Albero AVL):} Un albero binario di ricerca in cui, per \textit{ogni nodo}, la differenza tra l'altezza del sottoalbero sinistro e quella del sottoalbero destro è al massimo 1.
+            \item \textbf{Perfettamente bilanciato (o bilanciato in peso):} Un albero in cui, per \textit{ogni nodo}, il numero di nodi nel sottoalbero sinistro differisce al massimo di 1 dal numero di nodi nel sottoalbero destro. Questa definizione è molto più restrittiva e raramente usata.
+        \end{itemize}
+        
+        \item \textbf{Albero Degenerato (o Sbilanciato):}
+        Il caso peggiore. Un albero in cui ogni nodo genitore ha un solo nodo figlio, trasformandosi essenzialmente in una lista concatenata. L'altezza è $O(n)$.
+    \end{itemize}
+}
+
+La differenza tra un albero "completo" e un albero "perfetto" è particolarmente importante.

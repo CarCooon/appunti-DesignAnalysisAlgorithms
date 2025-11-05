@@ -1,0 +1,34 @@
+# Directory degli output temporanei
+build/
+
+# File ausiliari LaTeX
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.nav
+*.snm
+*.vrb
+
+# File generati da compilazioni o strumenti ausiliari
+*.blg
+*.bbl
+*.bcf
+*.run.xml
+
+# Editor / OS
+.vscode/
+Thumbs.db
+.DS_Store
+
+# Opzionale: escludere PDF generati automaticamente
+# Se vuoi NON includere il PDF nel repo, decommenta la riga seguente
+# *.pdf
+
+# Se invece vuoi includere uno specifico PDF (es. main.pdf) lascia tutto commentato e aggiungi:
+# !main.pdf

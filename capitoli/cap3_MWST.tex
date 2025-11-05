@@ -1,0 +1,198 @@
+\chapter{Multi-Way Search Tree (MWST)}
+\label{cap:MWST}
+
+\paragraph{Definizione:} Un \textbf{Multi-Way Search Tree (MWST)} è un albero ordinato in cui:
+\begin{itemize}
+    \item Ogni nodo dell'albero ($d$-nodo) ha $d \ge 2$ figli e contiene $d-1$ elementi chiave valore $(k_i, v_i)$ ordinati in modo crescente per chiave.
+    \item Sia $w$ un nodo con figli $w_1, w_2, \ldots, w_d$ e con chiavi $k_1, k_2, \ldots, k_{d-1}$. Allora:
+    \begin{itemize}
+        \item Tutte le chiavi nel sottoalbero radicato in $w_1$ sono minori di $k_1$.
+        \item Tutte le chiavi nel sottoalbero radicato in $w_i$ sono comprese tra $k_{i-1}$ e $k_i$ ($i = 2, \ldots, d-1$).
+        \item Tutte le chiavi nel sottoalbero radicato in $w_d$ sono maggiori di $k_{d-1}$.
+    \end{itemize}
+    \item I nodi foglia (None) non contengono elementi.
+\end{itemize}
+
+Si osservi come un MWST contenente $n$ elementi abbia $n+1$ nodi foglia (None).
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{immagini/MWST/MWST_inorder.png}
+    \label{fig:MWST_inorder}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{immagini/MWST/MWST_search.png}
+    \label{fig:MWST_search}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{immagini/MWST/MWST_exSearch.png}
+    \label{fig:MWST_exSearch}
+\end{figure}
+
+
+
+\section{(a, b)-Tree}
+\paragraph{Definizione:} Gli \textbf{(a, b)-Tree} sono dei \emph{MWST} che soddisfano le seguenti proprietà:
+\begin{itemize}
+    \item $2 \le a \le \left\lceil \frac{b-1}{2} \right\rceil$
+    \item \textbf{Root Property:} La radice ha almeno $2$ figli e al più $b$ figli.
+    \item \textbf{Node-Size Property:} Ogni nodo diverso dalla radice ha almeno $a$ figli e al più $b$ figli.
+    \item \textbf{Depth Property:} Tutti i nodi foglia (None) sono allo stesso livello.
+\end{itemize}
+
+
+\clearpage
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/MWST/ab_example.png}
+    \caption{Esempio di un (a, b)-Tree con $a=3$ e $b=6$.}
+    \label{fig:ab_example}
+\end{figure}
+
+\subsection*{Altezza di un (a, b)-Tree e Ricerca di un elemento}
+L'altezza di un (a, b)-Tree con $n$ elementi è: 
+\begin{itemize}
+    \item $\Omega(\log n / \log b)$ [== $\Omega(\log_b n)$].
+    \item $O(\log n / \log a)$ [== $O(\log_a n)$].
+\end{itemize}
+
+\noindent
+Per ogni nodo, è necessario eseguire una ricerca tra tutti i suoi elementi. Un nodo è una \emph{Map} di al più $b-1$ elementi, per cui possiamo denotare con $f(b)$ il costo della ricerca in un nodo. Se l'elemento non è stato trovato è necessario scendere in uno dei figli, per cui il costo totale della ricerca in un (a, b)-Tree è: $$O(f(b) \log n / \log a)$$
+Se $f(b)$ è costante, il costo della ricerca è migliore di $O(\log n)$.
+
+
+\clearpage
+\section{Insert}
+Per inserire un elemento ($k, v$) in un (a, b)-Tree, si procede come segue:
+\begin{enumerate}
+    \item Si esegue una ricerca per trovare la posizione corretta in cui inserire l'elemento: supponendo che l'albero non presenti già un elemento con chiave $k$, la ricerca termina senza successo restituendo il nodo foglia (None) $z$. Sia $w$ il genitore di $z$, inseriamo il nuovo elemento in $w$ e aggiungiamo una nuova foglia (None) $y$ come figlio di $w$.
+    \item A questo punto, se $w$ ha meno di $b-1$ elementi (cioè ha meno di $b$ figli), l'inserimento è terminato.
+    \item Altrimenti, se $w$ ha già $b-1$ elementi (cioè $b$ figli), si verifica un \textbf{overflow} e dobbiamo eseguire un \textbf{split} di $w$:
+    \begin{itemize}
+        \item Consideriamo il nodo $w$ con i suoi $b-1$ elementi, più il nuovo elemento appena inserito.
+        \item Si esegue uno \textbf{split} di $w$ in tre parti: gli elementi minori di $k'$, l'elemento mediano $k'$ e gli elementi maggiori di $k'$.
+        \item Si crea un nuovo nodo che conterrà gli elementi minori di $k'$. (Questo nodo è automaticamente valido perchè contiene almeno $\lceil (b-1)/2 \rceil -1 \ge a-1$ elementi e sicuramente meno di $b-1$ elementi).
+        \item Vale lo stesso per il nodo che conterrà gli elementi maggiori di $k'$.
+        \item L'elemento mediano $k'$ viene promosso al genitore $p$ di $w$ e diventa un nuovo elemento di $p$, con i due nodi risultanti dallo split come suoi figli.
+        \begin{itemize}
+            \item Se $p$ ha ora $b$ elementi, si ripete la procedura di split su $p$.
+            \item Altrimenti, l'inserimento è terminato.
+            \item Se il nodo splittato era la radice, si crea una nuova radice che contiene solo l'elemento mediano $m$ e ha come figli i due nodi risultanti dallo split.
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/MWST/insert.png}
+    \caption{Esempio di inserimento con overflow in un (a, b)-Tree con $a=2$ e $b=4$. (a) overflow in un 5-nodo $w$ [il massimo è un 4-nodo]; (b) e (c) split di $w$.}
+    \label{fig:insert}
+\end{figure}
+
+\clearpage
+\section{Delete}
+Per eliminare un elemento ($k, v$) in un (a, b)-Tree, si procede come segue:
+\begin{enumerate}
+    \item Si esegue una ricerca per trovare il nodo $w$ contenente l'elemento da eliminare $k$. Se il nodo non esiste, l'operazione termina.
+    \item Se il figlio a sinistra o a destra di $k$ non è vuoto, oppure $w$ è la radice, allora:
+    \begin{itemize}
+        \item Si trova il predecessore o il successore di $k$ (cioè l'elemento più grande del sottoalbero sinistro o l'elemento più piccolo del sottoalbero destro) e lo indichiamo con $k'$.
+        \item Si scambia l'elemento con chiave $k$ con l'elemento con chiave $k'$.
+        \item Si elimina l'elemento con chiave $k'$ dal sottoalbero (l'elemento originario con chiave $k'$).
+    \end{itemize}
+    \item Altrimenti, se entrambi i figli di $k$ sono vuoti, e:
+    \begin{itemize}
+        \item il nodo $w$ ha $ > a-1 $ elementi, eliminiamo l'elemento con chiave $k$ da $w$ e l'operazione termina.
+        \item il nodo $w$ ha esattamente il numero minimo di $a-1$ elementi, si verifica un \textbf{underflow}.
+    \end{itemize}
+    \item Gestione dell'underflow:
+    \begin{itemize}
+        \item Se il nodo $x$ fratello sinistro di $w$ (con lo stesso genitore $p$) ha più di $a-1$ elementi, si esegue un \textbf{transfer}:
+        \begin{itemize}
+            \item Sia $k'$ la chiave salvata nel genitore $p$ "che sta tra il puntatore a $x$ e il puntatore a $w$".
+            \item Sia $k''$ la chiave più grande nel nodo $x$(ricordiamo che $x$ è il fratello a sinistra di $w$).
+            \item Cancella $k$ da $w$, cancella $k''$ da $x$ e sostituisci $k'$ con $k''$ in $p$, e aggiungi $k'$ in $w$.
+        \end{itemize}
+        \item Se il nodo $x$ fratello destro di $w$ (con lo stesso genitore $p$) ha più di $a-1$ elementi, si esegue un \textbf{transfer}:
+        \begin{itemize}
+            \item L'opposto del caso precedente: si prende la chiave più piccola dal fratello destro $x$ e la si sposta in $w$, aggiornando di conseguenza il genitore $p$.
+        \end{itemize}
+        \item Altrimenti, se entrambi i fratelli di $w$ hanno esattamente $a-1$ elementi, si esegue una \textbf{fusion}:
+        \begin{itemize}
+            \item Sia $x$ un fratello di $w$ (a sinistra o a       destra) con lo stesso genitore $p$.
+            \item Sia $k'$ la chiave salvata nel genitore $p$ "che     sta tra il puntatore a $x$ e il puntatore a $w$".
+            \item Si crea un nuovo nodo che contiene tutti gli     elementi di $w$ eccetto l'elemento con chiave $k$,     tutti gli elementi di $x$ e l'elemento con chiave $k'$.
+            \begin{itemize}
+                \item È un nodo valido perchè contiene un numero di        elementi pari a: $$a-1 \le (a-2)+(a-1)+1 = 2a-2 \le        b-1$$
+            \end{itemize}
+            \item Si elimina $k'$ da $p$.
+            \begin{itemize}
+                \item Se $p$ è la radice e $k'$ è il suo unico     elemento, il nuovo nodo creato diventa la radice.
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/MWST/delete.png}
+    \caption{Una sequenza di rimozioni in un (a, b)-Tree con $a=2$ e $b=4$. (a) rimozione di 4, che causa un underflow; (b) un'operazione di transfer; (c) dopo l'operazione di transfer; (d) rimozione di 12, che causa un underflow; (e) un'operazione di fusion; (f ) dopo l'operazione di fusion; (g) rimozione di 13; (h) dopo la rimozione di 13.}
+    \label{fig:delete}
+\end{figure}
+
+\subsection*{Complessità delle operazioni di inserimento e cancellazione}
+\noindent
+Si tenga presente che la ricerca di un nodo, come visto prima, impiega un tempo $O(f(b) \log n / \log a)$. Supponendo che la gestione di un overflow/underflow richieda al più $g(b)$ [$g(b)$ dipende dall'implementazione del nodo], e considerando che potrebbe essere necessario ripetere al più tali operazioni dal livello $h-1$ fino alla radice. Quindi, il costo totale dell'inserimento in un (a, b)-Tree è: 
+$$O\left(\left(f(b) + g(b)\right) \log n / \log a\right)$$
+
+\subsection*{Come scegliere a e b?}
+Se i nodi sono troppo piccoli, l'albero sarà essenzialmente simile ad un albero binario di ricerca bilanciato. Nonostante ciò, vedremo che i (2, 4)-Tree sono particolarmente importanti perchè possono essere trasformati in degli alberi particolari chiamati \textbf{Red-Black Tree}.
+
+\vspace{1\baselineskip}
+\noindent
+Se i nodi sono troppo grandi, l'albero diventa meno efficiente in termini di spazio e di tempo per le operazioni di ricerca, inserimento e cancellazione. Dipende da come è implementata la Map all'interno del nodo.
+\begin{itemize}
+    \item Se si tratta di Hash Tables, la ricerca e gli aggiornamenti sono $O(1)$, ma il calcolo della mediana è $O(b)$.
+    \item Se si tratta di BST bilanciati, la ricerca e gli aggiornamenti sono $O(\log b)$ e il calcolo della mediana è $O(b)$.
+    \item Se si tratta di vettori ordinati, la ricerca è $O(\log b)$, gli aggiornamenti sono $O(b)$ e il calcolo della mediana è $O(1)$.
+\end{itemize}
+Idealmente, vorremmo che tutte queste operazioni vadano come $O(1)$, ma ciò non è possibile. In pratica, si cerca di minimizzare $b$ in modo che le operazioni siano efficienti, ma abbastanza grande da ridurre l'altezza dell'albero.
+
+\vspace{1\baselineskip}
+\noindent
+Se $a$ e $b$ sono troppo distanti tra loro, la complessità delle operazioni interne al nodo cancellano il vantaggio dato dalla riduzione dell'altezza [$f(b)$ e $g(b)$ crescono troppo rapidamente fino a diventare di gran lunga più pesanti di $\log a$]. 
+
+
+
+\section{B-Tree}
+Un \textbf{B-Tree} è un (a, b)-Tree con $a = \lceil (b-1)/2 \rceil$ e $b = d$.
+
+\noindent
+Per le considerazioni fatte sugli (a, b)-Tree, si ha che:
+\begin{itemize}
+    \item La ricerca ha una complessità di $O(f(d) \log n / (\log d - 1))$.
+    \item L'inserimento e la cancellazione hanno una complessità di $O(g(d) \log n / (\log d - 1))$.
+\end{itemize}
+
+
+\subsection*{I/O Complexity}
+Consideriamo il problema della gestione di una grande raccolta di elementi che non rientrano nella memoria principale, come un tipico database. In questo contesto, ci riferiamo ai blocchi di memoria secondaria come \emph{disk blocks}. Allo stesso modo, ci riferiamo al trasferimento di un blocco tra la memoria secondaria e la memoria primaria come \emph{disk transfer}. Ricordando la grande differenza di tempo che esiste tra gli accessi alla memoria principale e gli accessi al disco, l'obiettivo principale della gestione di tale raccolta nella memoria esterna è quello di ridurre al minimo il numero di trasferimenti su disco necessari per eseguire una query o un aggiornamento. Ci riferiamo a questo numero come \textbf{I/O complexity} dell'algoritmo coinvolto.
+
+\vspace{1\baselineskip}
+\noindent
+Il modo migliore di ridurre al minimo il numero di trasferimenti su disco è quello di massimizzare il numero di elementi che possono essere memorizzati in un singolo blocco. Supponiamo che ogni blocco di disco possa contenere $B$ elementi. Nel caso di un B-Tree, scegliamo il suo \emph{ordine} $d$ (il numero massimo di figli per nodo) il più grande possibile, in modo tale che un nodo -- contenente $O(d)$ elementi e puntatori -- occupi al massimo un singolo blocco di disco.
+%
+Si ottiene così una relazione diretta tra $d$ e $B$, ovvero $d = \Theta(B)$.
+%
+Di conseguenza, ogni accesso a un nodo del B-Tree corrisponde a un singolo trasferimento su disco. Scegliendo $d$ così grande, si massimizza il fattore di diramazione (branching factor) e si minimizza l'altezza dell'albero.
+%
+Poiché l'altezza di un B-Tree con $n$ elementi è $O(\log_d n)$, e dato che $d = \Theta(B)$, la \textbf{I/O complexity} per la \textbf{ricerca} è $O(\log_B n)$.
+%
+Anche l'inserimento e la cancellazione mantengono questa complessità, poiché, oltre alla ricerca iniziale, richiedono un numero di operazioni di modifica (come divisioni o fusioni di nodi) proporzionale all'altezza dell'albero.
+%
+In conclusione, i B-Tree sono una struttura dati molto efficiente per la gestione di grandi raccolte di elementi nella memoria esterna.
+

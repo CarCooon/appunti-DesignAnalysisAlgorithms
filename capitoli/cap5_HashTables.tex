@@ -1,0 +1,186 @@
+\chapter{Hash Tables}
+\label{cap:HashTables}
+
+Come visto finora, le possibili implementazioni dell'\emph{ADT Map} sono molteplici, da una semplice lista ordinata o non ordinata, a strutture dati più complesse come tutte le tipologie di alberi presentate nei capitoli precedenti. Tuttavia, queste implementazioni hanno tutte in comune il fatto che le operazioni di ricerca, inserimento e cancellazione hanno una complessità temporale di almeno \(O(\log n)\) nel caso migliore (per alberi bilanciati) e \(O(n)\) nel caso peggiore (per semplici liste). Ciascuna implementazione ha i suoi pro e contro, e la scelta di quale utilizzare dipende da vari fattori, tra cui la frequenza delle operazioni di inserimento, cancellazione e ricerca, la necessità di ordinare le chiavi, ecc. 
+In questo capitolo introduciamo una delle strutture dati più popolari per l'implementazione di una mappa, e quella utilizzata dalla stessa implementazione di Python per la classe \texttt{dict}. Questa struttura è nota come \textbf{hash table} (tabella hash). 
+
+Intuitivamente, una mappa $M$ supporta l'astrazione di utilizzare le chiavi come indici con una sintassi del tipo $M[k]$. Consideriamo inizialmente un contesto ristretto in cui una mappa con $n$ elementi utilizza chiavi che si presuppone essere interi in un intervallo da $0$ a $N-1$ per qualche $N \ge n$. In questo caso, possiamo rappresentare la mappa utilizzando una \emph{lookup table} di lunghezza $N$, come illustrato in Figura \ref{fig:lookup_table}.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/HashTables/lookup_table.png}
+    \caption{Una lookup table di lunghezza $N = 11$ per una mappa contenente $n = 4$ elementi: (1,D), (3,Z), (6,C), (7,Q).}
+    \label{fig:lookup_table}
+\end{figure}
+
+Ci sono due aspetti che vogliamo estendere rispetto a questa semplice rappresentazione per arrivare alla definizione di \emph{hash table}:
+\begin{itemize}
+    \item Come prima cosa, potremmo non voler utilizzare un array di lunghezza $N$ nel caso in cui $N \gg n$.
+    \item In secondo luogo, non è necessario che le chiavi di una mappa siano interi. 
+\end{itemize}
+
+
+\clearpage
+\noindent
+Una tabella hash, per un dato tipo di chiave, consiste in:
+\begin{itemize}
+    \item Un array di bucket di lunghezza \(N\).
+    \item Una funzione di hash \(h\).
+    \item Un metodo per gestire le collisioni all'interno di ciascun bucket.
+\end{itemize}
+
+\section{Hash Functions}
+Una Hash Table utilizza una \textbf{funzione di hash} per mappare una chiave generica in un indice della tabella. Idealmente, le chiavi saranno ben distribuite nell'intervallo da $0$ a $N - 1$ dalla funzione di hash, ma in pratica potrebbero esserci due o più chiavi distinte che vengono mappate allo stesso indice. Di conseguenza, concettualizzeremo la nostra tabella come un array di bucket, come mostrato in Figura \ref{fig:bucket_array}, in cui ogni bucket può gestire una collezione di elementi che vengono inviati a uno specifico indice dalla funzione di hash.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/HashTables/bucket_array.png}
+    \caption{Un bucket array di lunghezza $N = 11$. Ogni bucket può contenere zero, uno, o più elementi.}
+    \label{fig:bucket_array}
+\end{figure}
+
+Formalmente, una funzione di hash è una funzione \(h: K \rightarrow \{0, 1, \ldots, N-1\}\) che mappa ogni chiave \(k \in K\) in un indice della tabella. La scelta di una buona funzione di hash è cruciale per le prestazioni della hash table, poiché una cattiva distribuzione delle chiavi può portare a un numero elevato di collisioni, ovvero situazioni in cui più chiavi vengono mappate allo stesso indice, quindi allo stesso bucket.
+
+L'idea principale è quella di usare la funzione di hash $h$ per determinare il valore $h(k)$, che useremo come indice nel bucket array, $A$, al posto del valore di chiave $k$ stesso (come abbiamo detto $k$ non è necessariamente un intero, per cui potrebbe essere poco adatto come indice). Quindi, memorizziamo l'elemento formato dalla coppia chiave-valore $(k, v)$ nel bucket $A[h(k)]$. 
+
+Se ci sono due o più chiavi con lo stesso valore di hash, allora due elementi diversi verranno mappati allo stesso bucket in $A$. In questo caso, diciamo che si è verificata una \textbf{collisione}. Ci sono modi per gestire le collisioni, di cui discuteremo più avanti, ma la strategia migliore è cercare di evitarle in primo luogo. Diciamo che una funzione di hash è "buona" se mappa le chiavi nella nostra mappa in modo da minimizzare sufficientemente le collisioni.
+
+\clearpage
+\noindent
+È comune pensare ad una funzione di hash come la composizione di due diverse funzioni:
+\begin{itemize}
+    \item Hash code: una funzione \(h_1: K \rightarrow \mathbb{Z}\) che mappa una chiave \(k\) in un intero (positivo o negativo).
+    \item Compression function: una funzione \(h_2: \mathbb{Z} \rightarrow \{0, 1, \ldots, N-1\}\) che mappa l'intero risultante in un indice della tabella hash.
+\end{itemize}
+
+\[ 
+h(x) = h_2(h_1(x))
+\]
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/HashTables/hash_function.png}
+    \caption{Le due parti di una funzione hash: hash code e funzione di compressione.}
+    \label{fig:hash_function}
+\end{figure}
+
+La separazione di queste due funzioni consente l'utilizzo di hash codes che sono validi per uno specifico insieme di chiavi, indipendentemente dalla dimensione della tabella hash (la cui dimensione può variare dinamicamente nel tempo).
+
+\clearpage
+\subsection{Esempi di Hash Code}
+Come abbiamo detto la funzione di hash code mappa una generica chiave in un intero. Una \emph{collisione} si verifica quando due chiavi distinte producono lo stesso hash code, per cui la funzione di compressione non può fare nulla per evitarla e memorizzerà entrambe le chiavi nello stesso bucket. Di conseguenza, è importante scegliere una buona funzione di hash code che minimizzi le collisioni per il tipo di chiavi che ci aspettiamo di utilizzare nella nostra mappa.
+
+Presentiamo alcuni tra i metodi più comuni per il calcolo dell'hash code:
+\begin{itemize}
+    \item \textbf{Memory address}: Si utilizza l'indirizzo di memoria (un intero) della chiave come hash code.
+    \item \textbf{Rappresentazione in bit}: Si interpreta la rappresentazione in bit della chiave come un intero.
+    \item \textbf{Composition}: Si partizionano i bit della chiave in gruppi di dimensione fissa, si sommano ignorando l'overflow (XOR).
+    \item \textbf{Polinomial accumulation}: A differenza dei metodi precedenti che funzionano bene per chiavi numeriche, questo metodo è adatto per chiavi di tipo stringa, o più in generale per oggetti di lunghezza variabile in cui l'ordine degli elementi è importante. Si partizionano i bit della chiave in gruppi di dimensione fissa ($a_0, a_1, \ldots, a_{k-1}$) e si calcola il polinomio $p(z) = a_0 + a_1 z + a_2 z^2 + \ldots + a_{k-1} z^{k-1}$ per un opportuno valore di $z$. L'hash code è quindi il valore di $p(z)$ calcolato in un intero di dimensione fissa, ignorando l'overflow.
+\end{itemize}
+
+
+\subsection{Esempi di Funzione di Compressione}
+La funzione di compressione mappa un intero (l'hash code) in un indice della tabella hash, ovvero in un intero nell'intervallo $[0, N-1]$, dove $N$ è la dimensione della tabella hash. Una buona funzione di compressione deve riuscire a minimizzare il numero di collisioni a partire da hash codes differenti (poiché se due hash codes sono uguali, non c'è modo di evitare la collisione).
+
+\begin{itemize}
+    \item \textbf{Modulo}: 
+    \begin{itemize}
+        \item \(h_2(y) = y \mod N\)
+        \item Questa funzione può portare a molte collisioni se \(N\) ha fattori comuni con gli hash codes, per cui $N$ è tipicamente un numero primo.
+    \end{itemize}
+    \item \textbf{MAD (Multiply-Add-Divide)}: 
+    \begin{itemize}
+        \item \(h_2(y) = [(ay + b) \mod p] \mod N\)
+        \item $p > N$ è un numero primo, e $a$ e $b$ sono interi scelti casualmente in $[0, p-1]$ con $a > 0$.
+        \item La probabilità che due hash codes distinti $y_1$ e $y_2$ causino una collisione è al più $1/N$.
+    \end{itemize}
+\end{itemize}
+
+
+\clearpage
+\section{Gestione delle Collisioni}
+L'esistenza delle collisioni ci impedisce di memorizzare semplicemente un elemento $(k, v)$ nel bucket $A[h(k)]$. Inoltre complica in modo significativo le operazioni di ricerca, inserimento e cancellazione. In questa sezione presentiamo due approcci comuni per gestire le collisioni: \emph{separate chaining} e \emph{open addressing}.
+
+\subsection{Separate Chaining}
+Una soluzione semplice ed efficiente per gestire le collisioni è quella di far sì che ogni bucket \(A[j]\) memorizzi un riferimento ad una struttura dati secondaria, che contiene gli elementi \((k, v)\) tali che \(h(k) = j\). Una scelta naturale per la struttura dati secondaria è una semplice linked list. Questa regola di risoluzione delle collisioni è nota come \textbf{separate chaining}, ed è illustrata in Figura \ref{fig:separate_chaining}.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/HashTables/separate_chaining.png}
+    \caption{Hash Table di dimensione 13, che memorizza 10 elementi con chiavi intere, con collisioni risolte tramite separate chaining. La funzione di compressione è \(h(k) = k \mod 13\). Per semplicità, non mostriamo i valori associati alle chiavi.}
+    \label{fig:separate_chaining}
+\end{figure}
+
+Nel caso peggiore, le operazioni su di uno specifico bucket impiegano tempo proporzionale alla dimensione del bucket stesso. Assumendo di utilizzare una buona funzione di hash per indicizzare gli \(n\) elementi della nostra mappa in un bucket array di capacità \(N\), la dimensione attesa di ciascun bucket è \(n/N\). Dunque, con una buona funzione di hash, le operazioni principali sulla mappa richiedono un tempo atteso di \(O(n/N)\). Il rapporto \(\lambda = n/N\), chiamato \textbf{load factor} (fattore di carico) della tabella hash, dovrebbe essere limitato da una piccola costante, preferibilmente inferiore a 1. Finché \(\lambda\) è \(O(1)\), le operazioni principali sulla tabella hash vengono eseguite in tempo atteso \(O(1)\).
+
+
+\clearpage
+\subsection{Open Addressing}
+La tecniche di \emph{separate chaining} è effiente e facile da implementare, ma richiede inevitabilmente spazio aggiuntivo per le strutture dati ausiliarie. Se si vuole evitare di utilizzare spazio aggiuntivo per gestire le collisioni, l'unico approccio possibile è quello di cercare uno slot alternativo, sempre all'interno del nostro array, in cui memorizzare l'elemento che causa la collisione. 
+
+Ci sono diverse varianti che utilizzano questo approccio, noti come tecniche di \textbf{open addressing}. Queste tecniche richiedono che il load factor \(\lambda = n/N\) sia sempre inferiore a 1, ovvero che \(n < N\), poiché ogni elemento deve essere memorizzato in uno slot dell'array.
+
+
+\subsubsection{Linear Probing}
+Un metodo semplice per gestire le collisioni con l'open addressing è il \emph{linear probing}. Con questo approccio, se si tenta di inserire un elemento \((k,v)\) in un bucket già occupato, si cerca il successivo bucket libero nell'array, procedendo in modo circolare, "sondando" linearmente uno slot per volta. Da qui il nome di \emph{linear probing} (probe = sondare).
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/HashTables/linear_probing.png}
+    \caption{Inserimento di elementi con chiavi intere utilizzando linear probing per gestire le collisioni. La funzione di compressione è \(h(k) = k \mod 11\). Per semplicità, non mostriamo i valori associati alle chiavi.}
+    \label{fig:linear_probing}
+\end{figure}
+
+Un problema può sorgere quando, facendo riferimento alla Figura \ref{fig:linear_probing}, si elimina l'elemento con chiave $37$ e successivamente si tenta di ricercare l'elemento con chiave $15$. Poichè l'elemento con chiave $15$ è stato memorizzato, a seguito di una collisione, dopo l'elemento $37$, la ricerca di $15$ fallirà se ci si ferma al primo slot vuoto incontrato (quello lasciato libero da $37$). 
+
+Per risolvere questo problema, quando si elimina un elemento in una tabella hash che utilizza linear probing, si può marcare lo slot come "AVAILABLE" invece di lasciarlo vuoto. In questo modo, durante la ricerca, si continuerà a sondare gli slot successivi anche se si incontra uno slot marcato, garantendo così che tutti gli elementi possano essere trovati correttamente, mentre durante l'inserimento, gli slot marcati possono essere riutilizzati per nuovi elementi. Di fatto, uno slot marcato come "AVAILABLE" differenzia uno slot precedentemente occupato da uno slot mai usato prima, e viene trattato come occupato durante la ricerca, ma come vuoto durante l'inserimento.
+
+
+\subsubsection{Il problema del Clustering causato da Linear Probing}
+Un problema noto con il linear probing è il fenomeno del \textbf{clustering lineare}. Quando si verifica una collisione e si utilizza il linear probing per trovare uno slot libero, gli elementi tendono a raggrupparsi in cluster contigui all'interno dell'array. Questi cluster possono crescere nel tempo, aumentando la probabilità di ulteriori collisioni e rallentando le operazioni di ricerca, inserimento e cancellazione. Questo perché, quando si cerca uno slot libero, si potrebbe dover sondare attraverso un intero cluster, aumentando il tempo necessario per completare l'operazione, specialmente quando il load factor \(\lambda\) inizia ad essere maggiore di $1/2$.
+
+\vspace{2\baselineskip}
+\noindent
+Esistono altre tecniche di open addressing che cercano di mitigare il problema del clustering lineare:
+
+\begin{itemize}
+    \item \textbf{Quadratic Probing}: Evita il clustering lineare utilizzando una funzione di probing quadratica per trovare lo slot successivo, ma crea cluster di forma più complessa (clustering secondario). Funziona bene solo se il load factor \(\lambda\) è mantenuto al di sotto di \(1/2\).
+    \item \textbf{Double Hashing}: Si utilizza una seconda funzione di hash per calcolare l'offset in caso di collisione. Questo metodo riduce significativamente il clustering e offre prestazioni migliori rispetto al linear e quadratic probing, specialmente a load factor più elevati.
+\end{itemize}
+
+\clearpage
+\subsubsection{Double Hashing}
+La tecnica del \emph{double hashing} utilizza una seconda funzione di hash $d(k)$ per ricalcolare l'offset in caso di collisione. Invece di sondare linearmente o quadraticamente, si calcola un offset basato sulla chiave stessa, il che aiuta a distribuire gli elementi in modo più uniforme nell'array e riduce il clustering.
+
+La procedura di inserimento con double hashing funziona come segue:
+\begin{itemize}
+    \item $(h(k) + j \cdot d(k)) \mod N$, per \(j = 0, 1, \ldots, N - 1\)
+    \item Si tenta di inserire l'elemento nel bucket calcolato. Se il bucket è occupato, si incrementa \(j\) e si ricalcola l'indice fino a trovare uno slot libero.
+    \item Se si esauriscono tutti gli \(N\) tentativi senza trovare uno slot libero, la tabella è piena e l'inserimento fallisce.
+    \item La funzione di offset \(d(k)\) non può restituire zero.
+    \item $N$ dovrebbe essere un numero primo per garantire che tutti gli slot vengano sondati.
+    \item Una scelta comune per \(d(k)\) è \(d(k) = q - (h_1(k) \mod q)\), dove \(q\) è un numero primo più piccolo di \(N\).
+\end{itemize}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.6\textwidth]{immagini/HashTables/double_hashing.png}
+    \caption{Inserimento di elementi con chiavi intere: 18, 41, 22, 59, 32, 31, 73. $N = 13$, $h(k) = k \mod 13$, $d(k) = 7 - (k \mod 7)$. Per semplicità, non mostriamo i valori associati alle chiavi.}
+    \label{fig:double_hashing}
+\end{figure}
+
+
+\clearpage
+\section{Load Factor}
+Abbiamo visto come il \textbf{load factor} (fattore di carico) di una tabella hash è definito come il rapporto tra il numero di elementi memorizzati nella tabella \(n\) e la capacità totale della tabella \(N\), \(\lambda = n/N\). Questo parametro condizione fortemente le performance di una tabella hash. Secondo la letteratura, per mantenere prestazioni ottimali, il load factor dovrebbe essere mantenuto sempre al di sotto di una certa soglia, in base al tipo di gestione delle collisioni utilizzata:
+\begin{itemize}
+    \item \emph{separate chaining}: \(\lambda \le 0.9\).
+    \item \emph{open addressing}: \(\lambda \le 0.5\) (per linear probing e quadratic probing), \(\lambda \le 0.7\) (per double hashing).
+\end{itemize}
+
+
+\section{Analisi delle prestazioni}
+\begin{itemize}
+    \item \textbf{Worst case}: Il caso peggiore si ha quando tutte le chiavi collidono, per cui si ha un tempo \(O(n)\) per tutte le operazioni principali (ricerca, inserimento, cancellazione). Se i valori di hash sono distribuiti uniformemente, il numero di probe necessarie per trovare uno slot libero è in media \(1/(1 - \lambda)\).
+    \item \textbf{Average case}: Il tempo medio per tutte le operazioni principali è \(O(1)\). In pratica, con una buona funzione di hash, una hash table è estremamente efficiente se il load factor è molto minore di 1.
+\end{itemize}

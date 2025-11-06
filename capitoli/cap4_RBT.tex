@@ -111,7 +111,7 @@ Siano $z$ e il suo genitore $v$ entrambi rossi, e sia $w$ il fratello di $v$ (lo
     \end{itemize}
     \item Se $w$ è rosso, il double-red corrisponde ad un overflow e quindi in un 5-nodo nel (2, 4)-Tree corrispondente.
     \begin{itemize}
-        \item Si esegue una \textbf{ricolorazione} (recolouring) colorando $v$ e $w$ di nero, mentre $u$ viene colorato di rosso (se $u$ non è la radice).
+        \item Si esegue una \textbf{ricolorazione} (recolouring) colorando $v$ e $w$ di nero, mentre il loro genitore $u$ (genitore di $v$ e $w$, e nonno di $z$) viene colorato di rosso (se $u$ non è la radice).
         \item In questo caso il double-red può propagarsi verso l'alto, quindi potrebbe essere necessario ripetere la procedura sul nodo $u$ e il suo genitore.
     \end{itemize}
 \end{itemize}

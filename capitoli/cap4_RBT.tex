@@ -91,26 +91,28 @@ Sia $d$ la black-depth di $T$. Sia $T'$ il (2, 4)-Tree associato a $T$, e sia $h
 
 \section{Insert}
 Per inserire un nuovo nodo in un Red-Black Tree, si segue lo stesso procedimento di un normale BST:
-\begin{itemize}
+\begin{itemize}[nosep]
     \item Se il nuovo nodo $z$ è la radice, coloralo di nero.
     \item Altrimenti, inseriscilo come un nodo rosso.
 \end{itemize} 
-
-L'inserimento eseguito in questo modo mantiene le Root, External, e Depth Properties:
-\begin{itemize}
+\noindent
+L'inserimento eseguito in questo modo mantiene di già le Root, External, e Depth Properties. Tuttavia, potrebbe violare la Internal Property in alcuni casi:
+\begin{itemize}[nosep]
     \item Se il genitore di $z$ è nero, anche la Internal Property è mantenuta.
     \item Se il genitore di $z$ è rosso, la Internal Property viene violata in quanto si ottiene una sequenza di due nodi rossi, un \textbf{double red}. In questo caso, bisogna ristrutturare l'albero per ripristinare le proprietà dei Red-Black Trees.
 \end{itemize}
 
 \subsection{Come risolvere un double red}
 Siano $z$ e il suo genitore $v$ entrambi rossi, e sia $w$ il fratello di $v$ (lo zio di $z$).
-\begin{itemize}
+\begin{itemize}[nosep]
     \item Se $w$ è nero (o None), il double-red corrisponde ad una trasformazione sbagliata di un 4-nodo nel (2, 4)-Tree corrispondente.
-    \begin{itemize}
+    \begin{itemize}[nosep]
         \item Si esegue una \textbf{ristrutturazione} (Three-node restructuring, singola o doppia rotazione) su $z$.
+        \item Dopo la ristrutturazione, il nodo che diventa la radice della porzione ristrutturata viene colorato di nero, mentre i suoi due figli vengono colorati di rosso.
+        \item Una sola ristrutturazione è sufficiente per risolvere il problema del double-red.
     \end{itemize}
     \item Se $w$ è rosso, il double-red corrisponde ad un overflow e quindi in un 5-nodo nel (2, 4)-Tree corrispondente.
-    \begin{itemize}
+    \begin{itemize}[nosep]
         \item Si esegue una \textbf{ricolorazione} (recolouring) colorando $v$ e $w$ di nero, mentre il loro genitore $u$ (genitore di $v$ e $w$, e nonno di $z$) viene colorato di rosso (se $u$ non è la radice).
         \item In questo caso il double-red può propagarsi verso l'alto, quindi potrebbe essere necessario ripetere la procedura sul nodo $u$ e il suo genitore.
     \end{itemize}
@@ -140,23 +142,29 @@ Per eliminare un nuovo nodo con chiave $k$ in un Red-Black Tree, si segue lo ste
 \end{itemize} 
 
 
-\subsection{Delete di un nodo rosso}
-Se il nodo eliminato è rosso, tutte le proprietà dei Red-Black Trees rimangono valide, poiché la rimozione di un nodo rosso non altera la black depth di alcun percorso dalla radice a una foglia, e poiché questa operazione non può introdurre un double red. Nel corrispondente (2, 4)-Tree, la rimozione di un nodo rosso equivale alla rimozione di una chiave da un 3-nodo o da un 4-nodo, il che è sempre consentito senza ulteriori modifiche.
+\subsection{Caso 1: Delete di un nodo rosso}
+Se il nodo eliminato è rosso, tutte le proprietà dei Red-Black Trees rimangono valide, poiché la rimozione di un nodo rosso non altera la black depth di alcun percorso dalla radice a una foglia, e poiché questa operazione non può introdurre un double red. 
 
-\subsection{Delete di un nodo nero con un figlio rosso}
-\uline{Ricordiamo che stiamo trattando la rimozione di nodi con al più un figlio (per via della delete in un BST).} Se il nodo da eliminare è nero e ha un figlio, questo sarà sicuramente rosso (altrimenti la black depth property non sarebbe soddisfatta e non si avrebbe un Red-Black Tree valido).
+\vspace{1\baselineskip}
+Nel corrispondente (2, 4)-Tree, la rimozione di un nodo rosso equivale alla rimozione di una chiave da un 3-nodo o da un 4-nodo, il che è sempre consentito senza ulteriori modifiche.
 
-In questo caso, possiamo semplicemente rimuovere il nodo nero e promuovere il figlio rosso al suo posto, colorandolo di nero, ristabilendo tutte le proprietà dei Red-Black Trees. Nel corrispondente (2, 4)-Tree, questa operazione equivale alla rimozione del nodo nero da un 3-nodo.
+\subsection{Caso 2: Delete di un nodo nero con un solo figlio (rosso)}
+\uline{Ricordiamo che stiamo trattando la rimozione di nodi con al più un figlio (per via della delete in un BST).} 
+Se il nodo da eliminare è nero e ha un figlio, questo sarà sicuramente rosso (altrimenti la black depth property non sarebbe soddisfatta e non si avrebbe un Red-Black Tree valido).
+In questo caso, possiamo semplicemente rimuovere il nodo nero e promuovere il figlio rosso al suo posto, colorandolo di nero, ristabilendo tutte le proprietà dei Red-Black Trees. 
+
+\vspace{1\baselineskip}
+Nel corrispondente (2, 4)-Tree, questa operazione equivale alla rimozione del nodo nero da un 3-nodo.
 
 \vspace{8\baselineskip}
 \noindent
-Infine, consideriamo il caso più complesso, in cui il nodo da eliminare è un nodo nero foglia(None).
+Infine, consideriamo il caso più complesso, in cui il nodo da eliminare è un nodo nero senza figli.
 
 \clearpage
-\subsection{Delete di un nodo nero foglia (None)}
-Il caso più complesso si verifica quando il nodo da eliminare è un nodo nero foglia (None). Nel corrispondente (2, 4)-Tree, questa situazione equivale alla rimozione di una chiave da un 2-nodo. Senza un ribilanciamento, una modifica del genere comporta un deficit di uno per la black depth lungo il percorso che porta al nodo eliminato, violando così la Depth Property dei Red-Black Trees. Se prima della cancellazione l'albero era un Red-Black Tree valido, il nodo rimosso avrà sicuramente un fratello (sibling) il cui sottoalbero (radicato nel fratello) ha black height uguale a 1.
+\subsection{Caso 3: Delete di un nodo nero senza figli}
+Il caso più complesso si verifica quando il nodo da eliminare è un nodo nero senza figli. Nel corrispondente (2, 4)-Tree, questa situazione equivale alla rimozione di una chiave da un 2-nodo. Senza un ribilanciamento, una modifica del genere comporta un deficit di uno per la black depth lungo il percorso che porta al nodo eliminato, violando così la Depth Property dei Red-Black Trees. 
 
-Per rimediare a questo scenario, consideriamo un contesto più generale con un nodo $z$ che è noto per avere due sottoalberi, $T_{\text{heavy}}$ e $T_{\text{light}}$, tale che la radice di $T_{\text{light}}$ (se presente) è nera e tale che la black depth di $T_{\text{heavy}}$ è esattamente uno in più rispetto a quella di $T_{\text{light}}$, come illustrato in Figura \ref{fig:RBT_delete_deficit}. Nel caso di una foglia nera rimossa, $z$ è il genitore di quella foglia e $T_{\text{light}}$ è banalmente il sottoalbero vuoto che rimane dopo la cancellazione. Descriviamo il caso più generale di un deficit perché il nostro algoritmo per il ribilanciamento dell'albero, in alcuni casi, spingerà il deficit più in alto nell'albero (proprio come la risoluzione di una cancellazione in un (2,4) tree a volte si propaga verso l'alto). Indichiamo con $y$ la radice di $T_{\text{heavy}}$. (Un tale nodo esiste perché $T_{\text{heavy}}$ ha altezza nera almeno uno.)
+Per rimediare a questo scenario, consideriamo un contesto più generale con un nodo $z$ che è noto per avere due sottoalberi, $T_{\text{heavy}}$ e $T_{\text{light}}$, tale che la radice di $T_{\text{light}}$ (se presente) è nera e tale che la black depth di $T_{\text{heavy}}$ è esattamente uno in più rispetto a quella di $T_{\text{light}}$, come illustrato in Figura \ref{fig:RBT_delete_deficit}. Nel caso di una foglia nera rimossa, $z$ è il genitore di quella foglia e $T_{\text{light}}$ è banalmente il sottoalbero vuoto che rimane dopo la cancellazione. Descriviamo il caso più generale di un deficit perché il nostro algoritmo per il ribilanciamento dell'albero, in alcuni casi, spingerà il deficit più in alto nell'albero (proprio come la risoluzione di una cancellazione in un (2,4) tree a volte si propaga verso l'alto). Indichiamo con $y$ la radice di $T_{\text{heavy}}$ (Un tale nodo esiste perché $T_{\text{heavy}}$ ha altezza nera almeno uno).
 
 \begin{figure}[ht!]
     \centering
@@ -166,23 +174,30 @@ Per rimediare a questo scenario, consideriamo un contesto più generale con un n
 \end{figure}
 
 \noindent
+Ricapitolando:
+\begin{itemize}[nosep]
+    \item $z$ è un nodo con due sottoalberi $T_{\text{heavy}}$ e $T_{\text{light}}$, tali che:
+    \begin{itemize}[nosep]
+        \item $T_{\text{heavy}}$ ha altezza nera $d$.
+        \item $T_{\text{light}}$ ha altezza nera $d - 1$.
+    \end{itemize}
+    \item $y$ è la radice di $T_{\text{heavy}}$, la quale esiste sempre.
+    \item $z$ e $y$ possono essere sia rossi che neri.
+\end{itemize}
+
+\vspace{1\baselineskip}
+\noindent
 Distinguiamo tre possibili casi:
 \begin{itemize}
-    \item Nodo $y$ nero con un figlio rosso $x$.
+    \item Nodo $y$ nero con (almeno) un figlio rosso $x$.
     \item Nodo $y$ nero e entrambi i figli di $y$ sono neri (o None).
     \item Nodo $y$ rosso.
 \end{itemize}
 
+
 \clearpage
-\subsubsection{Caso 1: Nodo $y$ nero con un figlio rosso $x$}
-Si esegue una \emph{ristrutturazione} \texttt{restructure(x)} sui tre nodi $x$, il suo genitore $y$, e il nonno $z$, rinominati temporaneamente come $a$, $b$, e $c$ in ordine di chiave. 
-Sostituiamo $z$ con il nodo etichettato $b$, rendendolo il genitore degli altri due. Coloriamo $a$ e $c$ di nero, e diamo a $b$ il colore precedente di $z$.
-
-\vspace{1\baselineskip}
-Da notare che il percorso verso $T_{\text{light}}$ include un nodo nero aggiuntivo dopo la ristrutturazione, risolvendo così il suo deficit. Al contrario, il numero di nodi neri sui percorsi verso ciascuno degli altri tre sottoalberi illustrati in Figura \ref{fig:RBT_delete_case1} rimane invariato.
-
-\vspace{1\baselineskip}
-Risolvere questo caso corrisponde a un'operazione di \emph{transfer} nell'albero (2,4) $T'$ tra i due figli del nodo con $z$. Il fatto che $y$ abbia un figlio rosso ci assicura che rappresenta o un 3-nodo o un 4-nodo. In effetti, l'elemento precedentemente memorizzato in $z$ viene declassato per diventare un nuovo 2-nodo per risolvere la carenza, mentre un elemento memorizzato in $y$ o nel suo figlio viene promosso per prendere il posto dell'elemento precedentemente memorizzato in $z$.
+\subsubsection{Caso 3.1: Nodo $y$ nero con (almeno) un figlio rosso $x$}
+\paragraph{Soluzione:} Si esegue una \emph{ristrutturazione} \texttt{restructure(x)} sui tre nodi $x$, il suo genitore $y$, e il nonno $z$, rinominati temporaneamente come $a$, $b$, e $c$ in ordine di chiave. Sostituiamo $z$ con il nodo etichettato $b$, rendendolo il genitore degli altri due. Coloriamo $a$ e $c$ di nero, e diamo a $b$ il colore precedente di $z$.
 
 \begin{figure}[ht!]
     \centering
@@ -191,31 +206,43 @@ Risolvere questo caso corrisponde a un'operazione di \emph{transfer} nell'albero
     \label{fig:RBT_delete_case1}
 \end{figure}
 
+\vspace{1\baselineskip}
+Nel caso in cui $y$ abbia entrambi i figli rossi, possiamo scegliere arbitrariamente uno dei due come $x$. Altrimenti, scegliamo l'unico figlio rosso di $y$ come $x$. Da notare che il percorso verso $T_{\text{light}}$ include un nodo nero aggiuntivo dopo la ristrutturazione, risolvendo così il suo deficit. Al contrario, il numero di nodi neri sui percorsi verso ciascuno degli altri tre sottoalberi illustrati in Figura \ref{fig:RBT_delete_case1} rimane invariato.
 
+\vspace{1\baselineskip}
+Risolvere questo caso corrisponde a un'operazione di \emph{transfer} nell'albero (2,4) $T'$ tra i due figli del nodo con $z$. Il fatto che $y$ abbia un figlio rosso ci assicura che rappresenta o un 3-nodo o un 4-nodo. In effetti, l'elemento precedentemente memorizzato in $z$ viene declassato per diventare un nuovo 2-nodo per risolvere la carenza, mentre un elemento memorizzato in $y$ o nel suo figlio viene promosso per prendere il posto dell'elemento precedentemente memorizzato in $z$.
 
 
 
 \clearpage
-\subsubsection{Caso 2: Nodo $y$ nero e entrambi i figli di $y$ sono neri (o None)}
-La soluzione in questo caso corrisponde all'operazione di \emph{fusion} nell'albero (2, 4) $T'$, poiché $y$ deve rappresentare un 2-nodo. Eseguiamo una \emph{ricolorazione}; coloriamo $y$ di rosso e, se $z$ è rosso, lo coloriamo di nero. (Vedi Figura \ref{fig:RBT_delete_case2}). Questo non introduce alcuna violazione rossa, poiché $y$ non ha figli rossi.
+\subsubsection{Caso 3.2: Nodo $y$ nero e entrambi i figli di $y$ sono neri (o None)}
+\paragraph{Soluzione:} Si esegue una \emph{ricolorazione}, per cui coloriamo $y$ di rosso e, se $z$ è rosso, lo coloriamo di nero. 
+\begin{itemize}[nosep]
+    \item Se $z$ era originariamente rosso, questa ricolorazione risolve il deficit.
+    \item Se $z$ era originariamente nero, la ricolorazione non risolve il deficit, ma lo propaga più in alto nell'albero; dobbiamo ripetere la considerazione di tutti e tre i casi sul genitore di $z$ come rimedio.
+\end{itemize}
+\noindent
+Questa ricolorazione non introduce alcun double-red, poiché $y$ non ha figli rossi.
 
-\vspace{1\baselineskip}
-Nel caso in cui $z$ era originariamente rosso, e quindi il genitore nel corrispondente albero (2,4) è un 3-nodo o un 4-nodo, questa ricolorazione risolve il deficit. (Vedi Figura \ref{fig:RBT_delete_case2}a.) Il percorso che porta a $T_{\text{light}}$ include un nodo nero aggiuntivo nel risultato, mentre la ricolorazione non ha influenzato il numero di nodi neri sul percorso verso i sottoalberi di $T_{\text{heavy}}$. Nel caso in cui $z$ fosse originariamente nero, e quindi il genitore nel corrispondente albero (2, 4) è un 2-nodo, la ricolorazione non ha aumentato il numero di nodi neri sul percorso verso $T_{\text{light}}$; in effetti, ha ridotto il numero di nodi neri sul percorso verso $T_{\text{heavy}}$. (Vedi Figura \ref{fig:RBT_delete_case2}b.) Dopo questo passaggio, i due figli di $z$ avranno la stessa altezza nera. Tuttavia, l'intero albero radicato in $z$ è diventato carente, propagando così il problema più in alto nell'albero; dobbiamo ripetere la considerazione di tutti e tre i casi sul genitore di $z$ come rimedio.
 
 \begin{figure}[ht!]
     \centering
-    \includegraphics[width=1\textwidth]{immagini/RBT/RBT_delete_case2.png}
+    \includegraphics[width=0.8\textwidth]{immagini/RBT/RBT_delete_case2.png}
     \caption{Risoluzione di un deficit nero in $T_\text{light}$ tramite una ricolorazione. (a) quando $z$ è originariamente rosso, si invertono i colori di $y$ e $z$ per risolvere il deficit nero in $T_\text{light}$, terminando il processo; (b) quando $z$ è originariamente nero, la ricolorazione di $y$ causa un deficit nero nell'intero sottoalbero di $z$, trasportando il problema ad un livello superiore che andrà risolto seguendo uno dei tre casi descritti.}
     \label{fig:RBT_delete_case2}
 \end{figure}
 
+\vspace{1\baselineskip}
+\noindent
+La soluzione in questo caso corrisponde all'operazione di \emph{fusion} nell'albero (2, 4) $T'$, poiché $y$ deve rappresentare un 2-nodo. 
+Nel caso in cui $z$ era originariamente rosso, e quindi il genitore nel corrispondente albero (2,4) è un 3-nodo o un 4-nodo, questa ricolorazione risolve il deficit. (Vedi Figura \ref{fig:RBT_delete_case2}a.) Il percorso che porta a $T_{\text{light}}$ include un nodo nero aggiuntivo nel risultato, mentre la ricolorazione non ha influenzato il numero di nodi neri sul percorso verso i sottoalberi di $T_{\text{heavy}}$. Nel caso in cui $z$ fosse originariamente nero, e quindi il genitore nel corrispondente albero (2, 4) è un 2-nodo, la ricolorazione non ha aumentato il numero di nodi neri sul percorso verso $T_{\text{light}}$; in effetti, ha ridotto il numero di nodi neri sul percorso verso $T_{\text{heavy}}$. (Vedi Figura \ref{fig:RBT_delete_case2}b.) Dopo questo passaggio, i due figli di $z$ avranno la stessa altezza nera. Tuttavia, l'intero albero radicato in $z$ è diventato carente, propagando così il problema più in alto nell'albero; dobbiamo ripetere la considerazione di tutti e tre i casi sul genitore di $z$ come rimedio.
+
+
 
 
 \clearpage
-\subsubsection{Caso 3: Nodo $y$ rosso}
-Dato che $y$ è rosso e $T_{\text{heavy}}$ ha altezza nera almeno 1, $z$ deve essere nero e i due sottoalberi di $y$ devono avere ciascuno una radice nera e un'altezza nera uguale a quella di $T_{\text{heavy}}$. In questo caso, eseguiamo una rotazione su $y$ e $z$, e poi ricoloriamo $y$ di nero e $z$ di rosso. Questo denota una riorientazione di un 3-nodo nel corrispondente albero (2,4) $T'$.
-
-Questo non risolve immediatamente il deficit, poiché il nuovo sottoalbero di $z$ è un vecchio sottoalbero di $y$ con radice nera $y'$ e altezza nera uguale a quella dell'originale $T_{\text{heavy}}$. Riapplichiamo l'algoritmo per risolvere il deficit in $z$, sapendo che il nuovo figlio $y'$, che è la radice di $T_{\text{heavy}}$ è ora nero, e quindi che si applica o il Caso 1 o il Caso 2. Inoltre, la prossima applicazione sarà l'ultima, perché il Caso 1 è sempre terminale e il Caso 2 sarà terminale dato che $z$ è rosso.
+\subsubsection{Caso 3.3: Nodo $y$ rosso}
+\paragraph{Soluzione:} Si esegue una \emph{rotazione} su $y$ e $z$, seguita da una ricolorazione di $y$ in nero e di $z$ in rosso. Inoltre, poichè $y$ era originariamente rosso, il nuovo sottoalbero di $z$ deve avere una radice nera $y'$ e deve avere un'altezza nera uguale a quella originale di $T_{\text{heavy}}$. Pertanto, un deficit nero rimane nel nodo $z$ dopo la trasformazione, e quindi riapplichiamo l'algoritmo per risolvere il deficit in $z$, sapendo che il nuovo figlio $y'$, che è la radice di $T_{\text{heavy}}$ è ora nero, e quindi che si applica o il Caso 1 o il Caso 2. Inoltre, la prossima applicazione sarà l'ultima, perché il Caso 1 è sempre terminale e il Caso 2 sarà terminale dato che $z$ è rosso.
 
 \begin{figure}[ht!]
     \centering
@@ -223,6 +250,12 @@ Questo non risolve immediatamente il deficit, poiché il nuovo sottoalbero di $z
     \caption{Una rotazione e una ricolorazione su un nodo rosso $y$ e un nodo nero $z$, assumendo un deficit nero in $z$. Questo equivale a un cambiamento di orientamento nel corrispondente 3-nodo di un albero (2,4). Questa operazione non influisce sull'altezza nera di alcun percorso attraverso questa porzione dell'albero. Inoltre, poiché $y$ era originariamente rosso, il nuovo sottoalbero di $z$ deve avere una radice nera $y'$ e deve avere un'altezza nera uguale a quella originale di $T_{\text{heavy}}$. Pertanto, un deficit nero rimane nel nodo $z$ dopo la trasformazione.}
     \label{fig:RBT_delete_case3}
 \end{figure}
+
+\vspace{1\baselineskip}
+Da notare che inizialmente $y$ è rosso e $T_{\text{heavy}}$ ha altezza nera almeno 1, $z$ deve essere nero e i due sottoalberi di $y$ devono avere ciascuno una radice nera e un'altezza nera uguale a quella di $T_{\text{heavy}}$.
+
+\vspace{1\baselineskip}
+Le prime operazioni di rotazione e ricolorazione denotano una riorientazione di un 3-nodo nel corrispondente albero (2,4) $T'$.
 
 
 \clearpage

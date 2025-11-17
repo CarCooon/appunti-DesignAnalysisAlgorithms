@@ -47,6 +47,49 @@
 \usepackage{enumitem}
 \usepackage{amsmath}
 
+% --- PACCHETTI NECESSARI ---
+\usepackage{xcolor}      % gestione dei colori
+\usepackage{listings}    % ambiente per codice
+
+% --- COLORI TEMA DRACULA ---
+\definecolor{dracula-bg}{HTML}{282A36}       % sfondo
+\definecolor{dracula-current}{HTML}{44475A}  % riga corrente / cornice
+\definecolor{dracula-fg}{HTML}{F8F8F2}       % testo base
+\definecolor{dracula-comment}{HTML}{6272A4}  % commenti
+\definecolor{dracula-cyan}{HTML}{8BE9FD}     % variabili / funzioni
+\definecolor{dracula-green}{HTML}{50FA7B}    % valori booleani
+\definecolor{dracula-orange}{HTML}{FFB86C}   % numeri
+\definecolor{dracula-pink}{HTML}{FF79C6}     % keyword
+\definecolor{dracula-purple}{HTML}{BD93F9}   % operatori opzionali
+\definecolor{dracula-red}{HTML}{FF5555}      % errori / alert
+\definecolor{dracula-yellow}{HTML}{F1FA8C}   % stringhe
+
+% --- DEFINIZIONE STILE LISTINGS DRACULA ---
+\lstdefinestyle{dracula}{
+    language=Python,                             % linguaggio
+    backgroundcolor=\color{dracula-bg},          % sfondo
+    basicstyle=\ttfamily\footnotesize\color{dracula-fg}, % testo base
+    keywordstyle=\color{dracula-pink}\bfseries,  % keyword
+    commentstyle=\color{dracula-comment}\itshape, % commenti in corsivo
+    stringstyle=\color{dracula-yellow},          % stringhe
+    identifierstyle=\color{dracula-cyan},       % nomi di variabili / funzioni
+    numbers=left,                                % numeri a sinistra
+    numberstyle=\tiny\color{black},     % stile dei numeri di riga
+    stepnumber=1,                                % numerazione ogni riga
+    numbersep=5pt,                               % distanza numeri dal codice
+    showstringspaces=false,                      % non mostra spazi nelle stringhe
+    frame=single,                                % cornice semplice
+    rulecolor=\color{dracula-current},          % colore della cornice
+    breaklines=true,                             % va a capo automaticamente
+    breakatwhitespace=true,                      % preferenza per andare a capo agli spazi
+    tabsize=4                                    % tab = 4 spazi
+}
+
+% --- USO DELLO STILE ---
+\lstset{style=dracula}  % applica lo stile Dracula a tutti i blocchi \begin{lstlisting}
+
+
+
 
 % --- Bibliografia ---
 \usepackage[backend=biber,sorting=none,style=numeric]{biblatex}
@@ -106,7 +149,27 @@
 \end{titlepage}
 
 % Crea un sommario/indice
+% =================================================================
+% --- SOMMARIO INIZIA A SINISTRA ---
+%
+% 1. Salva il comando \cleardoublepage originale in \oldcleardoublepage
+\let\oldcleardoublepage\cleardoublepage
+%
+% 2. Fai in modo che \cleardoublepage si comporti come \clearpage
+%    (che va solo alla pagina *successiva*, non alla pagina *destra successiva*)
+\let\cleardoublepage\clearpage
+
+% Ora \tableofcontents userà la nostra versione "modificata" di \cleardoublepage
+% e inizierà felicemente sulla pagina 2 (sinistra)
 \tableofcontents
+
+% 3. Ripristina il comando \cleardoublepage originale
+%    così tutti i capitoli successivi (\input{capitoli...})
+%    torneranno a iniziare sulla pagina destra, come da regola "book".
+\let\cleardoublepage\oldcleardoublepage
+%
+% --- FINE ---
+% =================================================================
 
 
 % --- INIZIO DEL CONTENUTO ---
@@ -127,6 +190,9 @@
 
 \cleardoublepage
 \input{capitoli/cap6_PriorityQueues}
+
+\cleardoublepage
+\input{capitoli/cap7_PatternMatching}
 
 
 % Questo comando segna la fine del documento

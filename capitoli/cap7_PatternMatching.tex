@@ -1,0 +1,60 @@
+\chapter{Pattern Matching}
+\label{cap:PatternMatching}
+
+
+
+Introduciamo di seguito la terminologia di base:
+\begin{itemize}
+    \item \(\Sigma\) : l'alfabeto, ovvero l'insieme di caratteri possibili.
+    \item \(|\Sigma|\) : la dimensione dell'alfabeto.
+    \item Stringa \( S \) : una sequenza finita di caratteri appartenenti all'alfabeto \(\Sigma\), di lunghezza \( m \).
+    \item \(S[i]\) : il carattere alla posizione \( i \) della stringa \( S \).
+    \item \(S[i..j]\) : la sottostringa di \( S \) che va dall'indice \( i \) all'indice \( j \).
+    \item \(S[0..k]\) : prefisso di lunghezza \( k+1 \) della stringa \( S \).
+    \item \(S[j..m-1]\) : suffisso di lunghezza \( m-j \) della stringa \( S \). 
+\end{itemize}
+
+\noindent
+Nel classico problema di pattern matching, ci viene data una stringa di testo $T$ di lunghezza $n$ e una stringa di pattern $P$ di lunghezza $m$, e vogliamo scoprire se $P$ è una sottostringa di $T$. In tal caso, potremmo voler trovare l'indice più basso $j$ all'interno di $T$ in cui inizia $P$, in modo che $T[j..j+m-1]$ sia uguale a $P$, o forse trovare tutti gli indici di $T$ in cui inizia il pattern $P$.
+
+\clearpage
+\section{Brute Force}
+Il metodo più semplice per risolvere il problema del pattern matching è il metodo \textit{brute force}. L'idea alla base di questo metodo è di confrontare il pattern $P$ con ogni possibile sottostringa di $T$ di lunghezza $m$. In particolare, per ogni indice $i$ da $0$ a $n-m$, confrontiamo la sottostringa $T[i..i+m-1]$ con il pattern $P$. Se troviamo una corrispondenza, restituiamo l'indice $i$.
+
+\vspace{1\baselineskip}
+\begin{lstlisting}
+def find_brute(T, P):
+    """Return the lowest index of T at which substring P begins (or else -1)."""
+    n, m = len(T), len(P)  # introduce convenient notations
+    for i in range(n-m+1):  # try every potential starting index within T
+        k = 0  # an index into pattern P
+        while k < m and T[i + k] == P[k]:  # kth character of P matches
+            k += 1
+        if k == m:  # if we reached the end of pattern,
+            return i  # substring T[i:i+m] matches P
+    return -1  # failed to find a match starting with any i
+\end{lstlisting}
+\vspace{1\baselineskip}
+
+
+\subsection*{Performance}
+L'algoritmo consiste in due cicli annidati, con il ciclo esterno che scorre tutti i possibili indici iniziali del pattern nel testo $T$, e il ciclo interno che scorre ogni carattere del pattern $P$, confrontandolo con il suo potenziale carattere corrispondente nel testo. Pertanto, la correttezza dell'algoritmo deriva direttamente da questo approccio di ricerca esaustiva.
+
+Il tempo di esecuzione del pattern matching tramite \emph{Brute Force} nel caso peggiore non è buono poiché per ogni indice candidato in $T$, possiamo eseguire fino a $m$ confronti di caratteri per scoprire che $P$ non corrisponde a $T$ all'indice corrente. Dal blocco di codice si può osservare che il ciclo $for$ esterno viene eseguito al massimo $n-m+1$ volte e il ciclo $while$ interno viene eseguito al massimo $m$ volte. Pertanto, il tempo di esecuzione nel caso peggiore è $O(n m)$.
+
+\clearpage
+\subsection*{Esempio}
+Supponiamo di avere un testo 
+$$ T = \text{"abacaabaccabacabaabb"} $$
+e un pattern 
+$$ P = \text{"abacab"} $$
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/PatternMatching/ex_BruteForce.png}
+    \caption{Esempio di Pattern Matching con algoritmo Brute Force. L'algoritmo esegue 27 confronti tra caratteri, numerati in figura.}
+\end{figure}
+
+
+\clearpage
+\section{L'algoritmo di Boyer-Moore}

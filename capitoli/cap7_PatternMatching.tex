@@ -219,3 +219,84 @@ $$ P = \text{"abacab"} $$
 
 \clearpage
 \section{L'algoritmo di Knuth-Morris-Pratt}
+Analizzando le prestazioni nel caso peggiore degli algoritmi di pattern-matching \emph{brute-force} e \emph{Boyer-Moore} su istanze specifiche del problema possiamo notare una notevole inefficienza. Per un certo allineamento del pattern, se troviamo diversi caratteri corrispondenti ma poi rileviamo un mismatch, ignoriamo tutte le informazioni ottenute dai confronti andati a buon fine.
+
+L'algoritmo di \emph{Knuth-Morris-Pratt} (o “KMP”) evita questo spreco di informazioni e, facendo così, raggiunge un tempo di esecuzione di $O(n+m)$, $O(m)$ per il pre-processing del pattern, e $O(n)$ per i confronti tra testo e pattern. Nel caso peggiore qualsiasi algoritmo di pattern-matching dovrà esaminare tutti i caratteri del testo e tutti i caratteri del pattern almeno una volta. L'idea principale dell'algoritmo KMP è quella di pre-calcolare le sovrapposizioni del pattern su se stesso. In questo modo, quando si verifica un mismatch in una certa posizione, sappiamo immediatamente qual è lo spostamento massimo che possiamo applicare al pattern prima di continuare la ricerca.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{immagini/PatternMatching/KMP_first_example.png}
+    \caption{KMP non ripete i confronti sui primi tre caratteri del pattern dal momento che si ripetono e sono già stati confrontati con successo.}
+    \label{fig:KMP_first_example}
+\end{figure}
+
+\subsection{Failure-Function}
+L'algoritmo KMP si basa sul calcolo della \textbf{failure function} $f$, che indica il corretto spostamento di $P$ in caso di confronto fallito. In particolare, la funzione di fallimento $f(k)$ è definita come la \textbf{lunghezza del più lungo prefisso di $P$ che è anche un suffisso di $P[1:k+1]$}\footnote{P[1:k+1] comprende i caratteri da indice $1$ a indice $k$, $k+1$ non è incluso. Nota che non abbiamo incluso $P[0]$ qui, dal momento che una stringa è suffisso di sè stesso; così facendo imponiamo che sia un \textbf{suffisso proprio}, cioè diverso dalla stringa stessa}. Intuitivamente, se troviamo un mismatch sul carattere $P[k+1]$, la funzione $f(k)$ ci dice quanti dei caratteri immediatamente precedenti possono essere riutilizzati per riavviare il pattern. 
+
+Operativamente, la funzione viene utilizzata nel seguente modo: se durante il confronto si verifica un \textit{mismatch} all'indice $j$ del pattern (cioè $P[j] \neq T[i]$), significa che i caratteri precedenti $P[0 \dots j-1]$ corrispondevano al testo. Invece di ripartire da zero, l'algoritmo consulta il valore $f(j-1)$, il quale ci indica quanti caratteri del prefisso possiamo "salvare". Il confronto riprenderà quindi confrontando il carattere del testo $T[i]$ con il nuovo indice del pattern $j' = f(j-1)$.
+
+\clearpage
+\noindent
+Per esempio, consideriamo il pattern $P = \text{"amalgamation"}$. La failure function $f$ per questo pattern è mostrata nella tabella seguente:
+
+\begin{table}[h]
+    \centering
+    % Definisce: 1 colonna a sinistra, linea verticale, 12 colonne centrate
+    \begin{tabular}{l|*{12}{c}}
+        \textbf{$k$} & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 \\
+        \hline
+        \textbf{$P[k]$} & a & m & a & l & g & a & m & a & t & i & o & n \\
+        \hline
+        \textbf{$f[k]$} & 0 & 0 & 1 & 0 & 0 & 1 & 2 & 3 & 0 & 0 & 0 & 0 \\
+    \end{tabular}
+\end{table}
+
+
+\subsection*{Implementazione}
+L'implementazione dell'algoritmo KMP si basa su una funzione di utilità, \texttt{compute\_kmp\_fail}, per calcolare efficientemente la funzione di fallimento. La parte principale dell'algoritmo KMP è il suo ciclo \texttt{while}, che per ogni iterazione esegue un confronto tra il carattere $T[j]$ e il carattere $P[k]$. Se l'esito di questo confronto è una corrispondenza, l'algoritmo procede ai caratteri successivi sia in $T$ che in $P$ (o segnala una corrispondenza completa se si raggiunge la fine del pattern). Se il confronto fallisce, l'algoritmo consulta la funzione di fallimento per un nuovo carattere candidato in $P$, o ricomincia con il prossimo indice in $T$ se si fallisce sul primo carattere del pattern (dato che nulla può essere riutilizzato).
+
+\vspace{1\baselineskip}
+\begin{lstlisting}
+def find_kmp(T, P):
+    """Return the lowest index of T at which substring P begins (or else -1)."""
+    n, m = len(T), len(P)   # introduce convenient notations
+    if m == 0:
+        return 0            # trivial search of empty pattern
+    
+    fail = compute_kmp_fail(P)  # rely on utility to precompute fail function
+    j = 0                   # index into text
+    k = 0                   # index into pattern
+    while j < n:
+        if T[j] == P[k]:    # P[0:k] matched thus far
+            if k == m-1:    # match is complete  
+                return j - m + 1   # pattern begins at index (j-m+1) of text 
+            j += 1          # try to extend match
+            k += 1
+        elif k > 0:
+            k = fail[k-1]   # reuse suffix of P[0:k-1]
+        else:
+            j += 1          # no match at P[0], try next character in T
+    return -1 
+\end{lstlisting}
+
+
+\clearpage
+\begin{lstlisting}
+def compute_kmp_fail(P):
+    """Utility that computes and returns KMP fail list."""
+    m = len(P)
+    fail = [0] * m      # by default, presume overlap of 0 everywhere
+    j = 1
+    k = 0
+    while j < m:        # compute f(j) during this pass, if nonzero
+        if P[j] == P[k]:  # k+1 characters match thus far
+            fail[j] = k + 1
+            j += 1
+            k += 1
+        elif k > 0:     # k follows a matching prefix
+            k = fail[k-1]
+        else:           # no match found starting at j
+            j += 1
+    return fail
+\end{lstlisting}
+\vspace{1\baselineskip}

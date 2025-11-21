@@ -92,7 +92,7 @@ L'idea principale dell'algoritmo di \emph{Boyer-Moore} è di migliorare l'effici
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=0.8\textwidth]{immagini/PatternMatching/ex2_BoyerMoore.png}
-    \caption{Esmepio completo che mostra il numero di confronti.}
+    \caption{Esempio completo che mostra il numero di confronti.}
     \label{ex2BoyerMoore}
 \end{figure}
 
@@ -106,5 +106,116 @@ Per formalizzare l'algoritmo di \emph{Boyer-Moore} possiamo generalizzare il fun
 \end{itemize}
 
 Questi due casi sono rappresentati in figura \ref{fig:BM_mismatch_cases} e approfonfiti di seguito:
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/PatternMatching/BM_mismatch_cases.png}
+    \caption{Indichiamo con $i$ l'indice del carattere non corrispondente nel testo, con $k$ l'indice corrispondente nel pattern e con $j$ l'indice dell' ultima occorrenza di $T[i]$ all'interno del pattern. Distinguiamo due casi: \textbf{(a)} $j < k$, nel qual caso spostiamo il pattern di $k-j$ unità, e quindi l'indice $i$ avanza di $m-(j +1)$ unità; \textbf{(b)} $j > k$, nel qual caso spostiamo il pattern di un'unità, e l'indice $i$ avanza di $m-k$ unità.
+    N.B. $m$ è la lunghezza del pattern.}
+    \label{fig:BM_mismatch_cases}
+\end{figure}
+
+\clearpage
+\noindent
+Nel caso di \ref{fig:BM_mismatch_cases}(b), il pattern viene spostato di una sola unità a destra. Sarebbe sicuramente più produttivo spostare il pattern a destra fino a quando l'ultima occorrenza di $T[i]$ nel pattern non è allineata con $T[i]$, ma questo richiederebbe un ulteriore calcolo per la ricerca della nuova occorrenza. 
+
+L'efficienza dell'algoritmo di \emph{Boyer-Moore} risiede nell'utilizzo di una funzione di pre-elaborazione, $L(c)$, chiamata \textbf{last occurrence function} che consente di determinare rapidamente l'ultima occorrenza di un carattere nel pattern. Questa funzione viene calcolata una sola volta prima dell'inizio del processo di ricerca e viene utilizzata ogni volta che si verifica un mismatch.
+$$
+\forall c \in \Sigma, \quad L(c) = 
+\begin{cases} 
+   \max \{ i \mid P[i] = c \} & \text{se } c \in P \\
+   -1 & \text{se } c \notin P 
+\end{cases}
+$$
+
+\noindent
+Per esempio, se abbiamo 
+$\Sigma = \{ \text{'a'}, \text{'b'}, \text{'c'}, \text{'d'} \}$ 
+e 
+$P = \text{"abacab"}$
+:
+\begin{table}[h]
+    \centering
+    % Aumenta lo spazio orizzontale (default è 6pt)
+    \setlength{\tabcolsep}{18pt} 
+    % Aumenta lo spazio verticale (default è 1)
+    \renewcommand{\arraystretch}{1.5}
+
+    \begin{tabular}{|l|c|c|c|c|}
+        \hline
+        \textbf{c} & \textbf{'a'} & \textbf{'b'} & \textbf{'c'} & \textbf{'d'} \\
+        \hline
+        \textbf{$L(c)$} & 4 & 5 & 3 & -1 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\noindent
+Possiamo modellare $L$ come una \emph{Map} che ha per chiavi i caratteri dell'alfabeto e per valori gli indici delle loro ultime occorrenze nel pattern (ad esempio, in Python possiamo usare un dizionario).
+La Map $L$ può essere costruita in tempo $O(m + |\Sigma|)$ dove $m$ è la lunghezza del pattern e $|\Sigma|$ è la dimensione dell'alfabeto.
+
+\vspace{1\baselineskip}
+\begin{lstlisting}
+def last_occurrence(p, sigma):
+    """Return the last-occurrence map L for pattern p over alphabet sigma."""
+    L = {c:-1 for c in sigma}  # initialize all characters to -1
+    for i in range(len(p)):
+        L[p[i]] = i  # update with last occurrence of character p[i]
+    return L
+\end{lstlisting}
+
+\clearpage
+\begin{lstlisting}
+def find_boyer_moore(T, P):
+    """Return the lowest index of T at which substring P begins (or else -1)."""
+    n, m = len(T), len(P)   # introduce convenient notations
+    if m == 0:
+        return 0            # trivial search of empty pattern
+    
+    # last occurrence function
+    last = {}               # build the last-occurrence map
+    for k in range(m):
+        last[P[k]] = k      # later occurrence overwrites
+
+    # align end of pattern at index m-1 of text
+    i = m-1               #an index into T
+    k = m-1                 #an index into P
+    while i < n:
+        if T[i] == P[k]:    # a matching character
+            if k == 0:      
+                return i    # pattern begins at index i of text
+            else:
+                i -= 1      # examine previous character
+                k -= 1      # of both T and P
+        else:
+            j = last.get(T[i], -1)  # last(T[i]) is -1 if not found
+            i += m-min(k, j+1)      # case analysis for jump step
+            k = m-1                 # restart at end of pattern
+    return -1   
+\end{lstlisting}
+\vspace{1\baselineskip}
+
+\subsection*{Performance}
+La versione semplificata dell'algoritmo di Boyer-Moore presentata qui ha un tempo di esecuzione di $O(n m + |\Sigma|)$, in quanto la last-occurrence function richiede $O(m + |\Sigma|)$ tempo per essere costruita e la ricerca del pattern richiede $O(n m)$. 
+
+Il caso peggiore si verifica quando si ha una coppia del tipo: 
+$$T = \text{"aaa...aaa"} \quad P = \text{"baa...aaa"}$$
+In questo caso, l'algoritmo di Boyer-Moore si comporta come l'algoritmo Brute Force, eseguendo $O(n m)$ confronti tra caratteri.
+
+Tuttavia, l'algoritmo originale di Boyer-Moore utilizza euristiche più avanzate ed efficienti che consentono di ottenere un tempo di esecuzione medio di $O(n + m + |\Sigma|)$.
+
+\clearpage
+\subsection*{Esempio}
+Supponiamo di avere un testo 
+$$ T = \text{"abacaabadcabacabaabb"} $$
+e un pattern 
+$$ P = \text{"abacab"} $$
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/PatternMatching/BM_Lfunction.png}
+    \caption{Esempio di Pattern Matching con algoritmo di Boyer-Moore, con anche la tabella delle last occurrence. L'algoritmo esegue 13 confronti tra caratteri, numerati in figura.}
+\end{figure}
 
 
+\clearpage
+\section{L'algoritmo di Knuth-Morris-Pratt}

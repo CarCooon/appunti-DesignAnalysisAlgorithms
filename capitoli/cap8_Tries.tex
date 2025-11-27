@@ -107,3 +107,29 @@ La ricerca in un compressed trie non è necessariamente più veloce che in un al
 
 \clearpage
 \section{Suffix Tries}
+Un \textbf{Suffix Trie} per una stringa $X$ è un trie che contiene tutti i suffissi di $X$.
+
+Per un Suffix Trie, la rappresentazione compatta presentata nella sezione precedente può essere ulteriormente semplificata. In particolare, l'etichetta di ogni vertice è una coppia $(j,k)$ che indica la stringa $X[j : k]$. Al fine di soddisfare la regola che nessun suffisso di $X$ sia prefisso di un altro suffisso, possiamo aggiungere un carattere speciale, denotato con \$ (che non è nell'alfabeto originale $\Sigma$) alla fine di $X$ (e quindi a ogni suffisso). 
+
+Al netto di tutto ciò, se la stringa $X$ ha lunghezza $n$, costruiamo un trie per l'insieme di $n$ stringhe $X[j : n]$, per $j = 0, \ldots, n-1$.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.79\textwidth]{immagini/Tries/suffix_trie.png}
+    \caption{(a) Suffix trie $T$ per la stringa $X$ = "minimize". (b) Rappresentazione compatta di $T$, dove la coppia $(j:k)$ denota la porzione $X[j:k]$ nella stringa di riferimento.}
+    \label{fig:suffix_trie}
+\end{figure}
+
+\noindent
+Per costruire un Suffix Trie possiamo procedere in modo simile alla costruzione di uno Standard Trie (compresso). In breve, si segue il cammino esistente finché coincide; dove il cammino finisce o diverge si crea una diramazione.
+
+La lunghezza totale dei suffissi di una stringa $X$ di lunghezza $n$ è pari a:
+$$ 1 + 2 + \cdots + n = \frac{n(n+1)}{2} = O(n^2) $$
+Nonostante ciò, il suffix trie può essere costruito in spazio O(n) poiché molte porzioni dei suffissi condividono prefissi comuni.
+\noindent
+La costruzione di un Suffix Trie richiede un tempo $O(n^2)$, anche se in realtà esiste un algoritmo più complesso (che non approfondiremo) che costruisce un Suffix Trie in tempo $O(n)$.
+
+\clearpage
+
+
+\section{Pattern Matching con Suffix Tries}

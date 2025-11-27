@@ -107,7 +107,7 @@ La ricerca in un compressed trie non è necessariamente più veloce che in un al
 
 \clearpage
 \section{Suffix Tries}
-Un \textbf{Suffix Trie} per una stringa $X$ è un trie che contiene tutti i suffissi di $X$.
+Un \textbf{Suffix Trie} (o \emph{Suffix Tree}) per una stringa $X$ è un trie che contiene tutti i suffissi di $X$.
 
 Per un Suffix Trie, la rappresentazione compatta presentata nella sezione precedente può essere ulteriormente semplificata. In particolare, l'etichetta di ogni vertice è una coppia $(j,k)$ che indica la stringa $X[j : k]$. Al fine di soddisfare la regola che nessun suffisso di $X$ sia prefisso di un altro suffisso, possiamo aggiungere un carattere speciale, denotato con \$ (che non è nell'alfabeto originale $\Sigma$) alla fine di $X$ (e quindi a ogni suffisso). 
 
@@ -133,3 +133,105 @@ La costruzione di un Suffix Trie richiede un tempo $O(n^2)$, anche se in realtà
 
 
 \section{Pattern Matching con Suffix Tries}
+Il Suffix Trie $T$ per una stringa $X$ può essere utilizzato per eseguire efficientemente query di pattern-matching sul testo $X$. 
+
+Supponiamo di voler cercare un pattern $P$ di lunghezza $m$ e sia $D$ un testo di lunghezza $n$ (di solito $n \gg m$). Siamo in grado di trovare un'occorrenza di $P$ in $D$ con $O(n)$ pre-processing del testo, $O(m)$ per la ricerca e uno spazio utilizzato $O(n)$.
+\begin{itemize}
+    \item Se dobbiamo ricercare un nuovo pattern $P'$ in $D$, abbiamo bisogno solamente di un tempo $O(m')$, dove $m'$ è la lunghezza di $P'$.
+    \item Questo metodo è più efficiente di \emph{BM} o \emph{KMP} quando il testo è fisso e disponibile per essere pre-elaborato in anticipo.
+\end{itemize}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/Tries/st_pattern_matching.png}
+    \caption{Il pattern viene trovato in posizione: $8 - \text{len}(Y) = 5$}
+    \label{fig:st_pattern_matching}
+\end{figure}
+
+\noindent
+Eseguiamo il pattern matching come segue:
+\begin{itemize}
+    \item Costruiamo il Suffix Trie $T$ per il testo $D$, il che può essere fatto in $O(n)$ con uno spazio $O(n)$.
+    \item Confronta i caratteri di $P$ lungo l'unico percorso corrispondente in $T$ fino a quando:
+    \begin{itemize}
+        \item Tutti i caratteri di $P$ sono stati confrontati con successo (in questo caso, $P$ si trova in $D$).
+        \item Non sono possibili ulteriori match (in questo caso, $P$ non si trova in $D$).
+    \end{itemize}
+    \item Se $P$ è stato trovato, possiamo recuperare la posizione di $P$ all'interno di $D$ nel modo seguente: 
+    \begin{itemize}
+        \item Sia $v$ il nodo in cui termina il confronto, con etichetta $(j, k)$.
+        \item Sia $Y$ la stringa di lunghezza $y$ corrispondente al percorso dalla radice a $v$.
+        \item L'indice del primo carattere di $P$ in $D$ è dato da $k - y$.
+    \end{itemize}
+\end{itemize}
+
+
+\clearpage
+\section{The Substring Problem}
+In questa tipologia di problema abbiamo a disposizione un insieme noto e fissato di stringhe che chiameremo \textbf{database dei pattern}. Successivamente ci viene fornita una stringa $S$ per cui vogliamo trovare tutti i pattern nel database che contengono $S$ come sottostringa. 
+
+Osservando attentamente questo problema notiamo che si tratta in effetti del problema duale del \emph{pattern matching}, in cui abbiamo un testo fisso e cerchiamo un pattern variabile. Qui, invece, abbiamo un insieme fisso di pattern e cerchiamo una sottostringa che variabile.
+
+Supponiamo che la lunghezza totale delle stringhe nel database sia pari a $m$. Siccome normalmente questo valore $m$ può essere molto grande, vogliamo limitare lo spazio utilizzato per memorizzare il database, limitare il tempo necessario per il pre-processing e limitare la fase di ricerca il più possibile.
+
+\subsection*{Soluzione}
+La soluzione a questo problema sfrutta proprio i \textbf{Suffix Tries}, che come abbiamo visto sono capaci di rispettare i vincoli di spazio e tempo richiesti.
+\begin{itemize}
+    \item Costruiamo un Suffix Trie $T$ per l'insieme dei pattern nel database, che quindi conterrà tutti i suffissi di tutti i pattern. Questo richiede un tempo $O(m)$ e uno spazio $O(m)$.
+    \item Ogni nodo $v$ in $T$ mantiene una lista di tutti i pattern che contengono la stringa rappresentata dal percorso dalla radice a $v$.
+    \item Per cercare una stringa $S$ di lunghezza $n$, seguiamo il percorso in $T$ indicato dai caratteri di $S$. Se la ricerca termina con successo in un nodo $v$, allora tutti i pattern nella lista associata a $v$ contengono $S$ come sottostringa. Se il percorso si interrompe prima di raggiungere un nodo, allora nessun pattern nel database contiene $S$ come sottostringa.
+    \begin{itemize}
+        \item Se la ricerca ha successo, e $v$ è un nodo foglia, la stringa $S$ è proprio un pattern del database.
+        \item Se la ricerca ha successo, e $v$ è un nodo interno, la lista associata a $v$ contiene tutti i pattern che contengono $S$ come sottostringa.
+        \item Se la ricerca fallisce in un nodo $f$, il percorso per cui si ha avuto un match (parziale) fino a quel punto rappresenta il prefisso più lungo di $S$ che è anche una sottostringa di almeno un pattern nel database.
+    \end{itemize}
+    \item La ricerca richiede un tempo $O(n)$, dove $n$ è la lunghezza di $S$.
+\end{itemize}
+
+
+
+\clearpage
+\section{Longest Common Substring: two strings}
+Ricordiamo che una sottostringa $S[i:j]$ di una stringa $S$ è data dai caratteri $S[i], \ldots, S[j-1]$.
+Una stringa $S$ è una \textbf{sottostringa comune} di due stringhe $S_1$ e $S_2$ se ci esistoni degli indici $i, j, i', j'$ tali che $S = S_1[i:j] = S_2[i':j']$.
+
+Il problema della \emph{longest common substring} (LCS) consiste nel trovare la sottostringa comune più lunga, in questo caso tra due sole stringhe.
+
+
+\subsection*{Soluzione}
+Siano $m_1$ e $m_2$ le lunghezze delle due stringhe $S_1$ e $S_2$, e sia $m = m_1 + m_2$. La sottostringa comune più lunga tra due stringe può essere trovata in tempo $O(m)$ e spazio $O(m)$ utilizzando un Suffix Trie, come segue:
+\begin{itemize}
+    \item Costruiamo un Suffix Trie $T$ che contiene entrambe le stringhe (e i loro suffissi) e memorizziamo in ogni nodo un'etichetta con uno dei valori $\{1, 2, 1/2\}$ a seconda che il suffisso provenga da $S_1$, $S_2$ o entrambi.
+    \begin{itemize}
+        \item Questo richiede un tempo $O(m)$ e uno spazio $O(m)$.
+    \end{itemize}
+    \item Cerchiamo un nodo $v$ di $T$ con etichetta $1/2$ tale che la lunghezza della stringa corrispondente al percorso dalla radice a $v$ sia massima.
+    \begin{itemize}
+        \item Richiede di visitare al più tutti i nodi di $T$, quindi richiede un tempo $O(m)$.
+    \end{itemize}
+    \item La stringa corrispondente al percorso dalla radice a $v$ è la sottostringa comune più lunga tra $S_1$ e $S_2$.
+\end{itemize}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/Tries/lcs_two_strings.png}
+    \caption{Il simbolo \$ viene utilizzato per fare in modo che nessuna stringa sia prefisso di un'altra all'interno di $D$.}
+    \label{fig:lcs_two_strings}
+\end{figure}
+
+
+
+
+
+\clearpage
+\section{Longest Common Substring: many strings}
+
+
+
+
+
+
+
+
+
+

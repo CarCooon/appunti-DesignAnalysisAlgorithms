@@ -1,0 +1,70 @@
+\chapter{Greedy Algorithms}
+\label{cap:Greedy}
+
+L'\emph{approccio Greedy} è un paradigma di progettazione di algoritmi utilizzato per risolvere \textbf{problemi di ottimizzazione}. Un algoritmo greedy funziona bene quando una soluzione ottimale può essere raggiunta attraverso una \emph{serie di scelte locali ottimali}. A partire da una \emph{configurazione iniziale} (soluzione parziale), l'algoritmo effettua una scelta (la migliore possibile localmente) in una classe di possibili opzioni, e ripete lo stesso procedimento aggiornando di volta in volta la configurazione corrente, fino a raggiungere una soluzione completa.  
+
+In particolare, non possiamo utilizzare questo approccio per tutti i problemi di ottimizzazioni. Diciamo che un problema di ottimizzazione ammette una \textbf{soluzione greedy} se il problema soddisfa la proprietà:
+\begin{itemize}
+    \item \textbf{Greedy-choice property}: la soluzione completa ottimale può sempre essere raggiunta effettuando una serie di progressi, che rappresentano delle scelte locali ottimali, a partire da una configurazione iniziale.
+\end{itemize}
+
+\noindent
+Ad ogni passo, la "scelta" deve essere:
+\begin{itemize}
+    \item \textbf{Realizzabile}: deve soddisfare i vincoli dettati dal problema.
+    \item \textbf{Localmente ottima}: deve essere la scelta migliore tra tutte le scelte possibili (e realizzabili) in quel momento.
+    \begin{itemize}[nosep]
+        \item Non è necessario che questa scelta sia ottima rispetto alla soluzione globale.
+        \item Da notare che non è sempre detto che effettuare scelte localmente ottimali porti ad una soluzione globale ottimale. In questi casi, l'algoritmo greedy non funziona correttamente.
+    \end{itemize}
+    \item \textbf{Irrevocabile}: una volta effettuata una scelta, questa non può essere modificata in futuro.
+\end{itemize}
+
+\noindent
+Un algoritmo greedy costruisce una soluzione in piccoli passi successivi, scegliendo ad ogni passo una decisione che riguarda esclusivamente la configurazione corrente. Spesso si possono progettare molti algoritmi greedy diversi per lo stesso problema, ognuno dei quali ottimizza localmente e in modo incrementale qualche misura diversa nel suo cammino verso una soluzione. 
+È facile inventare algoritmi greedy per quasi tutti i problemi; trovare i casi in cui funzionano bene, e dimostrare che effettivamente funzionano bene, è la sfida interessante.
+
+
+
+\clearpage
+\section{Un modello generale}
+Indichiamo con $S$ la soluzione parziale corrente, e con $P$ il sotto problema che rimane da risolvere. Inizialmente, $S$ è vuota e $P$ coincide con il problema originale. Ad ogni passo, l'algoritmo greedy:
+
+\vspace{1\baselineskip}
+\hrule
+
+\begin{verbatim}
+1. Generate all candidate choices as list L for current sub-problem P.
+2. While (L is not empty or other finish condition is not met)
+3.     Compute the feasible value of each choice in L;
+4.     Modify S and P by taking choice with the highest feasible value;
+5.     Update L according to S and P;
+6. Endwhile
+7. Return the resulting complete solution.
+\end{verbatim}
+
+\hrule 
+\vspace{1\baselineskip}
+
+\noindent
+Sia $A$ l'insieme di tutti i possibili elementi del problema. Ad ogni step, l'algoritmo greedy mantiene una partizione $<X, Y, W>$ di $A$, dove:
+\begin{itemize}[nosep]
+    \item $X$: insieme degli elementi selezionati fino a quel momento (soluzione parziale corrente).
+    \item $Y$: insieme degli elementi valutati ma non ancora selezionati.
+    \item $W$: insieme degli elementi non ancora valutati.
+\end{itemize}
+Inizialmente, $W = A$ e $X = Y = \emptyset$. Alla fine dell'algoritmo, $X$ conterrà la soluzione completa, $Y = A/X$ contiene tutti gli elementi di $A$ che non sono stati selezionati, e $W = \emptyset$.
+
+\vspace{1\baselineskip}
+\noindent
+Gli algoritmi greedy sono spesso \textbf{estremamente intuitivi} al tal punto da rappresentare la soluzione più semplice e naturale per molti problemi. Sono anche molto \textbf{efficienti}, con complessità temporali che vanno da $O(n \log n)$ a $O(n)$, dove $n$ è la dimensione dell'input. Tuttavia, la loro efficienza dipende fortemente dalla natura del problema e dalla struttura dei dati utilizzati per implementare l'algoritmo.
+
+La parte più complicata nella progettazione di un algoritmo greedy è la \textbf{dimostrazione della correttezza} dell'algoritmo, che spesso richiede tecniche di dimostrazione specifiche per ogni problema. Le tecniche più comuni sono:
+\begin{itemize}
+    \item \textbf{Greedy stays ahead}: si dimostra che, ad ogni passo dell'algoritmo, la soluzione parziale costruita dall'algoritmo greedy è almeno altrettanto buona quanto qualsiasi altra soluzione parziale possibile.
+    \item \textbf{Exchange}: si dimostra che qualsiasi soluzione ottimale può essere trasformata nella soluzione prodotta dall'algoritmo greedy attraverso una serie di scambi di elementi, senza peggiorare la qualità della soluzione.
+\end{itemize}
+
+
+\clearpage
+\section{Coin Change}

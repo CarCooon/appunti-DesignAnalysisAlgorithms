@@ -234,5 +234,63 @@ dall'ordinamento iniziale delle attività per tempo di fine. L'algoritmo sfrutta
 
 \clearpage
 \section{Fractional Knapsack}
+Il problema del \emph{Fractional Knapsack} consiste nel massimizzare il valore totale degli elementi inseriti in uno "zaino" (knapsack) con una capacità limitata, permettendo di prendere frazioni degli oggetti. 
+
+Data una sequenza $S$ di $n$ elementi, ognuno dei quali ha un \textbf{peso} $p_i$ e un \textbf{valore} $v_i$ (entrambi interi positivi), e data una \textbf{capacità massima} $P$, l'obiettivo è selezionare una combinazione di elementi di $S$ (o frazioni di essi) in modo tale che il peso totale non superi $P$ e il valore totale sia massimizzato.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.7\textwidth]{immagini/Greedy/fractional_knapsack.png}
+    \caption{Esempio di soluzione ottimale per un'istanza del problema di Fractional Knapsack con capacità $P = \text{10ml}$.}
+    \label{ex:fractional_knapsack}
+\end{figure}
+
+\subsection*{Soluzione Greedy}
+Una soluzione greedy per questo problema consiste nell'ordinare gli elementi in ordine decrescente di \emph{valore per unità di peso}, dato dal rapporto $v_i/p_i$. Questo valore rappresenta il \textbf{profitto} ottenuto per ogni unità di peso dell'elemento $i$.
+Successivamente, gli elementi vengono inseriti per intero nello zaino in questo ordine, fino a quando non si raggiunge un elemento $j$, detto \emph{elemento critico}, che ha un peso maggiore della capacità massima residua dello zaino. A questo punto, si inserisce solo la frazione di $j$ che può essere contenuta nello zaino, e l'algoritmo termina, restituendo la soluzione completa. 
+
+
+
+\clearpage
+\hrule
+\begin{verbatim}
+Input:  Set S of items i with weight pi and value vi all positive
+        Knapsack capacity P>0
+Output: Amount xi of i that maximizes the total benefit without 
+        exceeding in the capacity
+
+1.  FractionalKnapsack(S, P):
+2.      for each i in S do
+3.          xi = 0              // initially the knapsack is empty
+4.          bi = vi/wi          // the benefit of item i
+5.      p = P       // remaining capacity in knapsack (initially p = P)
+6.      while p > 0 do
+7.          remove from S an item of maximal benefit    // greedy choice
+8.          xi = min(pi,  p)    // can't carry more than p
+9.          p -= xi             // update remaining capacity
+
+\end{verbatim}
+
+\hrule
+\vspace{1\baselineskip}
+
+\noindent
+L'algoritmo ha una complessità complessiva di $O(n \log n)$, dominata dall'ordinamento iniziale degli elementi in base al loro valore per unità di peso. La fase di selezione degli elementi richiede invece $O(n)$, poiché ogni elemento viene considerato una sola volta.
+
+
+\vspace{3\baselineskip}
+\noindent
+Come già accennato, progettare un algoritmo greedy è spesso semplice ed intuitivo; d'altra parte bisogna essere consapevoli che non tutti i problemi di ottimizzazione ammettono una soluzione \emph{ottimale} basata su questo approccio.
+
+Ad esempio, il problema del \emph{0-1 Knapsack}, in cui gli elementi non possono essere frazionati (cioè devono essere presi per intero o lasciati fuori dallo zaino), non ammette una soluzione ottimale basata su un algoritmo greedy. In questo caso, è necessario utilizzare tecniche più complesse, come la programmazione dinamica, per trovare la soluzione ottimale.
+
+I casi in cui un algoritmo greedy fallisce nel trovare la soluzione ottimale sono spesso caratterizzati dalla presenza di \textbf{scelte locali che non portano a una soluzione globale ottimale}, e trovare delle particolari istanze del problema che dimostrino questo fatto non è sempre banale. Inoltre, dimostrare che un algoritmo greedy è effettivamente ottimale per un dato problema può richiedere tecniche di dimostrazione specifiche e non sempre intuitive, anche se spesso si basano su idee semplici come \emph{greedy stays ahead} e \emph{exchange} già menzionate in precedenza.
+
+
+
+\clearpage
+\section{Text Compression}
+
+
 
 

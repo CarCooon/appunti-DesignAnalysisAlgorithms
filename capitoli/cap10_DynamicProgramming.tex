@@ -184,12 +184,12 @@ L'algoritmo per ricostruire la LCS ha una complessità temporale di $O(n + m)$, 
 \section{Edit Distance: Levenshtein Distance}
 Il problema della \emph{Edit Distance} consiste nel trovare il numero minimo di operazioni necessarie per trasformare una stringa in un'altra stringa.
 \begin{itemize}
-    \item Date due stringhe $X = x_0 x_1 \ldots x_{n-1}$ e $Y = y_0 y_1 \ldots y_{m-1}$ su di un alfabeto $\Sigma$, trovare il numero minimo di operazioni necessarie per trasformare $X$ in $Y$. Le operazioni consentite sono: Inserimento(Insert), Cancellazione(Delete), Sostituzione(Replace).
+    \item Date due stringhe $A = a_0 a_1 \ldots a_{n-1}$ e $B = b_0 b_1 \ldots b_{m-1}$ su di un alfabeto $\Sigma$, trovare il numero minimo di operazioni necessarie per trasformare $A$ in $B$. Le operazioni consentite sono: Inserimento(Insert), Cancellazione(Delete), Sostituzione(Replace).
 \end{itemize} 
 
 \noindent
-L'\emph{Edit Transcript} di due stringhe $X$ e $Y$ è una stringa $T$ sull'alfabeto $\{I, D, R, M\}$ (Insert, Delete, Replace, Match) che descrive una sequenza di operazioni per trasformare $X$ in $Y$. 
-Se in $T$ sostituiamo tutte le $I$ con $D$, e tutte le $D$ con $I$, otteniamo l'edit transcript $T'$ che trasforma $Y$ in $X$.
+L'\emph{Edit Transcript} di due stringhe $A$ e $B$ è una stringa $T$ sull'alfabeto $\{I, D, R, M\}$ (Insert, Delete, Replace, Match) che descrive una sequenza di operazioni per trasformare $A$ in $B$. 
+Se in $T$ sostituiamo tutte le $I$ con $D$, e tutte le $D$ con $I$, otteniamo l'edit transcript $T'$ che trasforma $B$ in $A$.
 
 \subsection*{Soluzione Dynamic Programming}
 Sia $D_{n,m}$ la distanza di edit tra le stringhe $A = a_0 a_1 \ldots a_{n-1}$ e $B = b_0 b_1 \ldots b_{m-1}$. $D_{n,m}$ rappresenta quindi la soluzione ottimale del problema.
@@ -267,7 +267,7 @@ EditDistance(A, B)
 L'algoritmo che si occupa di calcolare la tabella $D$ impiega due cicli annidati (oltre ai cicli di inizializzazione), iterando rispettivamente su $i$ e $j$. All'interno del ciclo più interno, viene eseguita una semplice operazione di confronto, una selezione condizionale e un'assegnazione, tutte con complessità $O(1)$, quindi la complessità totale dell'algoritmo è $O(n \cdot m)$, dove $n$ e $m$ sono le lunghezze delle stringhe $A$ e $B$ rispettivamente.
 
 \subsubsection*{Estrazione della soluzione}
-Anche in questo caso, la tabella $D$ contiene le distanze di edit per tutti i sotto-problemi, ma non restituisce direttamente la sequenza di operazioni necessarie per trasformare $A$ in $B$. Tuttavia, è possibile ricostruire questa sequenza a partire dalla tabella $D$. 
+Anche in questo caso, la tabella $D$ contiene le distanze di edit per tutti i sotto-problemi, ma non restituisce direttamente la sequenza di operazioni necessarie per trasformare $A$ in $B$. Tuttavia, è possibile ricostruire questa sequenza a partire dalla tabella $D$ in tempo $O(n + m)$. 
 \begin{itemize}
     \item Vogliamo trovare il percorso ottimale, ovvero quello che porta dalla cella $D(n,m)$ alla cella $D(0,0)$.
     \item Per fare ciò, per ciascuna cella $D(i,j)$ memorizziamo come il suo valore è stato calcolato.

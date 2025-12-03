@@ -67,7 +67,7 @@ Da notare che è diverso dal concetto di \emph{sottostringa}: una sottostringa �
 \noindent
 Uno dei problemi classici che può essere risolto in modo efficiente tramite la programmazione dinamica è il problema della \emph{Longest Common Subsequence} (LCS), ovvero la ricerca della sottosequenza comune più lunga tra due sequenze date.
 
-\begin{itemize}[nosep]
+\begin{itemize}
     \item Date due stringhe $X = x_0 x_1 \ldots x_{n-1}$ e $Y = y_0 y_1 \ldots y_{m-1}$ su di un alfabeto $\Sigma$, trovare la stringa più lunga che è una sottosequenza di entrambe le stringhe.
 \end{itemize}
 
@@ -181,4 +181,110 @@ L'algoritmo per ricostruire la LCS ha una complessità temporale di $O(n + m)$, 
 
 
 \clearpage
-\section{Edit Distance}
+\section{Edit Distance: Levenshtein Distance}
+Il problema della \emph{Edit Distance} consiste nel trovare il numero minimo di operazioni necessarie per trasformare una stringa in un'altra stringa.
+\begin{itemize}
+    \item Date due stringhe $X = x_0 x_1 \ldots x_{n-1}$ e $Y = y_0 y_1 \ldots y_{m-1}$ su di un alfabeto $\Sigma$, trovare il numero minimo di operazioni necessarie per trasformare $X$ in $Y$. Le operazioni consentite sono: Inserimento(Insert), Cancellazione(Delete), Sostituzione(Replace).
+\end{itemize} 
+
+\noindent
+L'\emph{Edit Transcript} di due stringhe $X$ e $Y$ è una stringa $T$ sull'alfabeto $\{I, D, R, M\}$ (Insert, Delete, Replace, Match) che descrive una sequenza di operazioni per trasformare $X$ in $Y$. 
+Se in $T$ sostituiamo tutte le $I$ con $D$, e tutte le $D$ con $I$, otteniamo l'edit transcript $T'$ che trasforma $Y$ in $X$.
+
+\subsection*{Soluzione Dynamic Programming}
+Sia $D_{n,m}$ la distanza di edit tra le stringhe $A = a_0 a_1 \ldots a_{n-1}$ e $B = b_0 b_1 \ldots b_{m-1}$. $D_{n,m}$ rappresenta quindi la soluzione ottimale del problema.
+
+\subsubsection*{Scomposizione in sotto-problemi}
+Sia $D(i,j)$ la distanza di edit tra i prefissi $a_0 a_1 \ldots a_{i-1}$ e $b_0 b_1 \ldots b_{j-1}$, con $0 \leq i \leq n$ e $0 \leq j \leq m$. $D(i,j)$ rappresenta quindi la soluzione ottimale al sotto-problema che considera solo i primi $i$ caratteri di $A$ e i primi $j$ caratteri di $B$.
+
+Anche in questo caso, osserviamo l'ultimo carattere di entrambe le stringhe, e da qui ricaviamo le \textbf{equazioni caratteristiche} che ci permettono di esprimere $D(i,j)$ in funzione dei sotto-problemi più piccoli:
+\begin{itemize}[nosep]
+    \item Se $a_{i-1} = b_{j-1}$ (\textbf{match}), allora non è necessaria alcuna operazione, e possiamo scrivere:
+    $$ D(i,j) = D(i-1,j-1) = D(i-1,j-1) + t(a_{i-1},b_{j-1}) $$
+    \item Se c'è una \textbf{replace} da $a_{i-1}$ a $b_{j-1}$:
+    $$ D(i,j) = D(i-1,j-1) + 1 = D(i-1,j-1) + t(a_{i-1},b_{j-1}) $$
+    \item se c'è una \textbf{delete} di $a_{i-1}$:
+    $$ D(i,j) = D(i-1,j) + 1 $$
+    \item se c'è una \textbf{insert} di $b_{j-1}$ dopo il carattere $a_{i-1}$:
+    $$ D(i,j) = D(i,j-1) + 1 $$
+\end{itemize}
+
+\noindent
+Dove la funzione di costo $t(a,b)$ è definita come:
+\[t(a,b) = \begin{cases}
+0 & \text{se } a = b \\
+1 & \text{se } a \neq b
+\end{cases}
+\]
+
+\clearpage
+Si è in grado quindi di riassumere le equazioni caratteristiche in un'unica espressione:
+\[ D(i,j) = \min \begin{cases}
+D(i-1,j-1) + t(a_{i-1},b_{j-1}) \\
+D(i-1,j) + 1 \\
+D(i,j-1) + 1 
+\end{cases} \]
+
+\subsubsection*{Boundary Conditions}
+È immediato riconoscere i casi base:
+\begin{itemize}[nosep]
+    \item $D(0,0) = 0$, in quanto la distanza di edit tra due stringhe vuote è zero.
+    \item Se una delle due stringhe è vuota, la distanza di edit è pari alla lunghezza dell'altra stringa, in quanto sono necessarie tante operazioni di inserimento o cancellazione quanti sono i caratteri della stringa non vuota. Quindi:
+    $$ D(0,j) = j \quad \text{per } 0 \leq j \leq m $$
+    $$ D(i,0) = i \quad \text{per } 0 \leq i \leq n $$
+\end{itemize}
+
+\subsubsection*{Calcolo della tabella}
+La tabella avrà dimensioni $(n+1) \times (m+1)$, dove l'elemento nella cella $(i,j)$ conterrà il valore di $D(i,j)$, ovvero la distanza di edit tra i primi $i$ caratteri di $A$ e i primi $j$ caratteri di $B$. Inizializziamo la prima riga e la prima colonna della tabella con i valori dei casi base, e poi riempiamo la tabella utilizzando l'equazione caratteristica definita sopra.
+
+Notiamo inoltre che la soluzione $D(i,j)$ appare nella computazione di:
+
+\noindent
+$ D(i+1,j) \quad D(i,j+1) \quad D(i+1,j+1) $ per cui riempiamo la tabella riga per riga (come LCS).
+
+\vspace{1\baselineskip}
+\hrule
+\begin{verbatim}
+EditDistance(A, B)
+1.  int n = len(A)
+2.  int m = len(B)
+3.  int D[n+1][m+1]
+4.  for i from 0 to n do
+5.      D[i][0] = i
+6.  for j from 0 to m do
+7.      D[0][j] = j
+8.  for i from 1 to n do
+9.      for j from 1 to m do
+10.         cost = 0 if A[i-1] == B[j-1] else 1
+11.         D[i][j] = min(D[i-1][j-1] + cost,
+12.                        D[i-1][j] + 1,
+13.                        D[i][j-1] + 1)
+14. return D[n][m]
+\end{verbatim}
+\hrule 
+
+\clearpage
+L'algoritmo che si occupa di calcolare la tabella $D$ impiega due cicli annidati (oltre ai cicli di inizializzazione), iterando rispettivamente su $i$ e $j$. All'interno del ciclo più interno, viene eseguita una semplice operazione di confronto, una selezione condizionale e un'assegnazione, tutte con complessità $O(1)$, quindi la complessità totale dell'algoritmo è $O(n \cdot m)$, dove $n$ e $m$ sono le lunghezze delle stringhe $A$ e $B$ rispettivamente.
+
+\subsubsection*{Estrazione della soluzione}
+Anche in questo caso, la tabella $D$ contiene le distanze di edit per tutti i sotto-problemi, ma non restituisce direttamente la sequenza di operazioni necessarie per trasformare $A$ in $B$. Tuttavia, è possibile ricostruire questa sequenza a partire dalla tabella $D$. 
+\begin{itemize}
+    \item Vogliamo trovare il percorso ottimale, ovvero quello che porta dalla cella $D(n,m)$ alla cella $D(0,0)$.
+    \item Per fare ciò, per ciascuna cella $D(i,j)$ memorizziamo come il suo valore è stato calcolato.
+    \begin{itemize}[nosep]
+        \item Per esempio, se $D(i,j) = D(i,j-1) + 1$, allora sappiamo il valore della cella $D(i,j)$ è stato ottenuto dalla cella $D(i,j-1)$.
+    \end{itemize}
+\end{itemize}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{immagini/Dynamic/edit_distance.png}
+    \caption{Esempio di tabella per il calcolo della Edit Distance dalla stringa "vintner" alla stringa "winters". Le frecce indicano il percorso ottimale per trasformare la stringa $A$ (vintner) nella stringa $B$ (winters).}
+    \label{fig:edit_distance}
+\end{figure}
+
+La freccia orizzontale ($\leftarrow$, da $D(i,j)$ a $D(i,j-1)$) rappresenta un'operazione di \textbf{inserimento} (Insert) del carattere $b_{j-1}$ in $A$.
+
+La freccia verticale ($\uparrow$, da $D(i,j)$ a $D(i-1,j)$) rappresenta un'operazione di \textbf{cancellazione} (Delete) del carattere $a_{i-1}$ da $A$. 
+
+La freccia diagonale ($\nwarrow$, da $D(i,j)$ a $D(i-1,j-1)$) rappresenta un'operazione di \textbf{match} (Match) se $a_{i-1} = b_{j-1}$ o di \textbf{sostituzione} (Replace) se $a_{i-1} \neq b_{j-1}$.

@@ -289,13 +289,155 @@ La freccia verticale ($\uparrow$, da $D(i,j)$ a $D(i-1,j)$) rappresenta un'opera
 
 La freccia diagonale ($\nwarrow$, da $D(i,j)$ a $D(i-1,j-1)$) rappresenta un'operazione di \textbf{match} (Match) se $a_{i-1} = b_{j-1}$ o di \textbf{sostituzione} (Replace) se $a_{i-1} \neq b_{j-1}$.
 
+
 \clearpage
 \section{Sequence Alignment}
+Un altro modo per misurare la somiglianza tra due stringhe è attraverso il \emph{sequence alignment}. 
+
+\begin{itemize}
+    \item Siano date due stringhe $X = x_1 x_2 \ldots x_m$ e $Y = y_1 y_2 \ldots y_{n}$.
+    \item Siano $S = \{1,2,\ldots,m\}$ e $T = \{1,2,\ldots,n\}$ gli insiemi degli indici rispettivamente di $X$ e $Y$.
+    \item Un \textbf{matching} tra $X$ e $Y$ consiste in un insieme $M$ di coppie $(x,y)$ in cui:
+    \begin{itemize}[nosep]
+        \item $x \in S$ e $y \in T$.
+        \item Ogni indice di $S$ compare al più una volta in $M$.
+        \item Ogni indice di $T$ compare al più una volta in $M$.
+    \end{itemize}
+    \item Un \textbf{alignment} di $X$ e $Y$ è un \emph{matching} $M$ di queste due stringhe, senza "crossing pairs" (coppie incrociate). 
+    \begin{itemize}
+        \item In altre parole, se $(i,j), (i',j') \in M$ e $i < i'$, allora deve essere $j < j'$.
+    \end{itemize}
+    \item Un \emph{alignment} ci dice quali coppie di posizioni allineate tra loro.
+\end{itemize}
 
 
+\noindent
+\begin{minipage}[c]{0.15\textwidth}
+    \hrule
+    \vspace{0.5\baselineskip}
+    \raggedright
+    \texttt{stop-} \\
+    \texttt{-tops}
+    \vspace{0.5\baselineskip}
+    \hrule
+\end{minipage}
+\hfill % Spazio flessibile tra le due colonne
+\begin{minipage}[c]{0.80\textwidth}
+    l'alignment corrispondente è: $\{(2,1), (3,2), (4,3)\}$.
+\end{minipage}
+
+\vspace{2\baselineskip}
+\noindent
+\begin{itemize}
+    \item Sia $M$ un dato alignment tra $X$ e $Y$.
+    \begin{itemize}
+        \item Per ogni posizione di $X$ e $Y$ che non è matchata in $M$ (un gap) si ha un \textbf{gap penalty} di $\delta > 0$.
+        \item Per ogni coppia $(i,j) \in M$ tale che $x_i = y_i$, non abbiamo alcun penalty.
+        \item Per ogni coppia $(i,j) \in M$ tale che $x_i = p, y_j = q$ e $p \neq q$, abbiamo un \textbf{mismatch penalty} di $\alpha_{pq} > 0$.
+    \end{itemize}
+    \item L'\textbf{alignment cost} di $M$ è la somma dei suoi \emph{gap} e \emph{mismatch} penalties. I valori di $\delta$ e $\alpha_{pq}$ sono specificati come parte del problema e dipendono dalla specifica applicazione.
+\end{itemize}
+
+\noindent
+\begin{minipage}[c]{0.16\textwidth}
+    \hrule
+    \vspace{0.5\baselineskip}
+    \raggedright
+    \texttt{o-currance} \\
+    \texttt{occurrence}
+    \vspace{0.5\baselineskip}
+    \hrule
+\end{minipage}
+\hfill % Spazio flessibile tra le due colonne
+\begin{minipage}[c]{0.80\textwidth}
+    Alignment costs $\delta + \alpha_{ae}$
+\end{minipage}
+
+\vspace{1\baselineskip}
+Cerchiamo un alignment tra $X$ e $Y$ che minimizzi il costo totale con qualsiasi $\delta$ e $\alpha_{pq}$.
+\vspace{1\baselineskip}
+
+\noindent
+\begin{minipage}[c]{0.16\textwidth}
+    \hrule
+    \vspace{0.5\baselineskip}
+    \raggedright
+    \texttt{o-curr-ance} \\
+    \texttt{occurre-nce}
+    \vspace{0.5\baselineskip}
+    \hrule
+\end{minipage}
+\hfill % Spazio flessibile tra le due colonne
+\begin{minipage}[c]{0.80\textwidth}
+    Alignment costs $3 \delta$
+\end{minipage}
+
+\clearpage
+\subsection*{Soluzione Dynamic Programming}
+Nell'alignment ottimale $M$, la coppia $(m,n)$ può essere presente o meno in $M$. Inoltre, gli ultimi caratteri delle due stringhe possono essere matchati tra loro oppure no. 
+
+\begin{itemize}
+    \item Se $(m,n) \notin M$, allora o la posizione $m$ di $X$ o la posizione $n$ di $Y$ non è matchata in $M$.
+    \begin{itemize}[nosep]
+        \item Altrimenti, ci sarebbero $(m,j)$ e $(i,n)$ in $M$ con $j < n$ e $i < m$.
+        \item Impossibile, poiché sarebbero coppie incrociate.
+    \end{itemize}
+    \item Quindi, in un alignment ottimale $M$, almeno una delle seguenti condizioni è vera:
+    \begin{itemize}[nosep]
+        \item $(m,n) \in M$ e paghiamo $\alpha_{pq}$ dove $p = x_m$ e $q = y_n$ (assumendo che $\alpha_{pp} = 0$).
+        \item La posizione $m$ di $X$ non è matchata e paghiamo $\delta$.
+        \item La posizione $n$ di $Y$ non è matchata e paghiamo $\delta$.
+        \end{itemize}
+\end{itemize}
+
+\noindent
+Denotiamo con $\text{OPT}(i,j)$ il costo minimo di alignment tra $x_1 x_2 \ldots x_i$ e $y_1 y_2 \ldots y_j$. 
+
+\begin{itemize}
+    \item Se scegliamo di inserire $(i,j)$ nell'alignment, allora dobbiamo pagare $\alpha_{pq}$, dove $p = x_i$, e $q = y_j$, più il costo del miglior alignment tra $x_1 x_2 \ldots x_{i-1}$ e $y_1 y_2 \ldots y_{j-1}$.
+    \[
+        \text{OPT}(i,j) = \alpha_{pq} + \text{OPT}(i-1,j-1)
+    \]
+    \item Se scegliamo di non matchare $x_i$, allora dobbiamo pagare un gap cost di $\delta$ più il costo del miglior alignment tra $x_1 x_2 \ldots x_{i-1}$ e $y_1 y_2 \ldots y_j$.
+    \[
+        \text{OPT}(i,j) = \delta + \text{OPT}(i-1,j)
+    \]
+    \item Se scegliamo di non matchare $y_j$, allora dobbiamo pagare un gap cost di $\delta$ più il costo del miglior alignment tra $x_1 x_2 \ldots x_i$ e $y_1 y_2 \ldots y_{j-1}$.
+    \[
+        \text{OPT}(i,j) = \delta + \text{OPT}(i,j-1)
+    \]
+\end{itemize}
+
+Tra tutte queste possibilità, scegliamo quella che minimizza il costo totale:
+\[
+    \text{OPT}(i,j) = \min \begin{cases}
+    \alpha_{pq} + \text{OPT}(i-1,j-1) \\
+    \delta + \text{OPT}(i-1,j) \\
+    \delta + \text{OPT}(i,j-1)
+    \end{cases}
+\]
+
+\noindent
+Le \textbf{boundary conditions} sono date dal fatto che l'allineamento di una stringa vuota con una stringa di lunghezza $i$ richiede $i$ gap, ovvero $i$ volte il costo di gap $\delta$:
+\[
+    \text{OPT}(i,0) = \text{OPT}(0,i) = i \cdot \delta
+\]
 
 
-
+\clearpage
+\noindent
+A questo punto non ci resta che mettere tutto insieme:
+\begin{itemize}
+    \item Costruiamo una tabella contenente i valori di $\text{OPT}(i,j)$ per $0 \leq i \leq m$ e $0 \leq j \leq n$.
+    \begin{itemize}[nosep]
+        \item Il tempo impiegato per questa operazione è $O(m \cdot n)$, dato che la tabella ha $O(m \cdot n)$ celle, e ciascuna può essere calcolata in tempo $O(1)$.
+    \end{itemize}
+    \item Il valore di $\text{OPT}(m,n)$ rappresenta il costo minimo di alignment tra le due stringhe $X$ e $Y$, e quindi la soluzione al problema originale.
+    \item Come già visto nei casi precedenti, possiamo tracciare il percorso attraverso la tabella per ricostruire l'alignment ottimale stesso.
+    \begin{itemize}[nosep]
+        \item Il tempo impiegato per questa operazione è $O(m + n)$, poiché in ogni passo si decrementa almeno uno tra $i$ e $j$, e il processo termina quando uno dei due raggiunge zero.
+    \end{itemize}
+\end{itemize}
 
 
 

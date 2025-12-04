@@ -440,6 +440,205 @@ A questo punto non ci resta che mettere tutto insieme:
 \end{itemize}
 
 
+\clearpage
+\section{Coin Change per sistemi non canonici}
+Il problema del \emph{Coin Change}, così come già visto nel Capitolo \ref{cap:Greedy}, consiste nel trovare il numero minimo di monete necessarie per eguagliare una certa somma, dato un insieme di tagli di monete disponibili. La soluzione greedy funziona correttamente solo per sistemi di monete canonici, ovvero quei sistemi in cui la scelta della moneta di taglio più grande possibile in ogni passo porta sempre alla soluzione ottimale. Tuttavia, esistono sistemi di monete non canonici in cui l'approccio greedy non garantisce la soluzione ottimale.
+
+\subsection*{Soluzione Dynamic Programming: $1^o$ approccio}
+Per risolvere il problema del Coin Change in sistemi non canonici, possiamo utilizzare un approccio di programmazione dinamica. 
+\begin{itemize}
+    \item Sia dato un insieme di $n$ tagli di monete $1 = c_1 < c_2 < \ldots < c_n$.
+    \item Definiamo $C[r]$ come il numero minimo di monete necessarie per eguagliare il resto $r$.
+\end{itemize}
+La soluzione ottimale può essere espressa in termini di soluzioni ottimali a sotto-problemi più piccoli.
+L'idea di base è che se in un dato step la soluzione ottimale utilizza una moneta di valore $c_i$, allora $C[r] = 1 + C[r - c_i]$. Quindi, possiamo esprimere $C[r]$ come:
+
+$$
+C[r] = 
+\begin{cases} 
+   \infty & \text{se } r < 0 \\
+   0 & \text{se } r = 0 \\
+   1 + \min\limits_{1 \le i \le n} \{ C[r - c_i] \} & \text{se } r \ge 1 
+\end{cases}
+$$
+
+\vspace{1\baselineskip}
+\noindent
+Questo è un possibile approccio per scomporre il problema in sotto-problemi più piccoli. Sviluppando questo ragionamento, avremmo una soluzione che impiega un tempo $O(n \cdot r)$. 
+A differenza degli esempi precedenti, in questo caso non c'è una tabella bidimensionale, ma un array monodimensionale $C$ di lunghezza $r + 1$, dove ogni elemento $C[j]$ rappresenta il numero minimo di monete necessarie per eguagliare il resto $j$. Questo approccio utilizza la programmazione dinamica per salvare i risultati intermedi, evitando di dover ricalcolare più volte la stessa soluzione. L'unica boundary condition è banalmente $C[0] = 0$, ovvero non è necesssaria alcuna moneta per eguagliare il resto zero; tutti gli altri valori $C[j]$ per $j \ge 1$ vengono derivati calcolando il minimo tra le opzioni disponibili.
+
+\clearpage
+\subsection*{Soluzione Dynamic Programming: $2^o$ approccio}
+Riprendiamo le assunzioni fatte prima ma in maniera leggermente diversa:
+\begin{itemize}
+    \item Sia dato un insieme di $n$ tagli di monete $1 = c_1 < c_2 < \ldots < c_n$.
+    \item Definiamo $M(i,r)$ come il numero minimo di monete $(c_1, c_2, ..., c_i)$, con $i \leq n$, necessarie per eguagliare il resto $r$.
+\end{itemize}
+L'idea di base è che in un dato step possiamo scegliere se includere o meno la moneta di taglio $c_i$ nella soluzione ottimale. Quindi, possiamo esprimere $M(i,r)$ come:
+
+$$
+M(i,r) = 
+\begin{cases}
+    M(i-1,r) & \text{se non inseriamo } c_i \text{ nella soluzione}\\
+    M(i, r-c_i) & \text{se inseriamo } c_i \text{ nella soluzione}
+\end{cases}
+$$
+
+\noindent
+Le boundary conditions sono le seguenti:
+\begin{itemize}
+    \item $M(i,0) = 0$, in quanto per eguagliare il resto zero non è necessaria alcuna moneta.
+    \item $M(1,r) = r$, se abbiamo solo monete di valore unitario $c_1 = 1$ l'unica soluzione possibile è utilizzare $r$ monete.
+    \item $M(i,r) = 1$ se $c_i = r$, in quanto possiamo eguagliare il resto $r$ con una sola moneta di valore $c_i$.
+    \item $M(i,r) = M(i-1,r)$ se $c_i > r$, in quanto non possiamo utilizzare la moneta di taglio $c_i$ se è maggiore del resto $r$.
+\end{itemize}
+
+\vspace{1\baselineskip}
+\begin{lstlisting}
+def dp_coin_change(amount, coins=[0, 1, 2, 5, 10, 20, 50]):
+    # coins[0] (che è 0) non viene usato, serve solo a scalare gli indici
+    nc = len(coins)
+    # Crea una matrice di nc righe. Nota: m[0] sarà la riga inutilizzata
+    m = [[0]*(amount+1) for _ in range(nc)] 
+    # Caso base: gestiamo la prima moneta reale (coins[1] = 1)
+    # Scriviamo sulla riga m[1]
+    for r in range(amount+1):
+        m[1][r] = r
+
+    # Ciclo principale: partiamo dalla seconda moneta reale (indice 2)
+    for i in range(2, nc):
+        for r in range(1, amount+1):
+            if coins[i] == r:
+                m[i][r] = 1
+            elif coins[i] > r:
+                m[i][r] = m[i-1][r]
+            else:
+                m[i][r] = min(m[i-1][r], m[i][r-coins[i]] + 1)
+                
+    return m, m[-1][-1]     # ritorna la matrice e il risultato finale
+\end{lstlisting}
+
+\noindent
+Una volta popolata la matrice $M$, la sequenza esatta di monete che costituisce la soluzione ottimale si ricava mediante una procedura di \textit{backtracking}. Si parte dalla cella finale $M[n][R]$ (dove $n$ è il numero di tipi di monete e $R$ l'importo totale) e si procede a ritroso fino a raggiungere un resto nullo ($r=0$).
+Ad ogni passo, trovandosi nella cella $(i, r)$, si confronta il valore corrente con quello della riga immediatamente superiore, $M[i-1][r]$:
+\begin{itemize}
+    \item Se $M[i][r] = M[i-1][r]$, significa che la moneta di taglio $c_i$ non è stata utilizzata per ottenere l'ottimo locale (la soluzione migliore era già stata trovata con le monete precedenti). In questo caso, ci si sposta semplicemente alla riga superiore: $(i-1, r)$.
+    \item Se invece $M[i][r] < M[i-1][r]$, implica che la moneta $c_i$ è stata utilizzata, facendo diminuire il numero di monete necessarie ($M[i][r] < M[i-1][r]$). Si aggiunge $c_i$ all'elenco delle monete scelte e si sottrae il suo valore dal resto residuo, spostandosi alla cella $(i, r - c_i)$. Si rimane sulla riga $i$ poiché, nel problema con ripetizioni, la stessa moneta potrebbe essere stata usata più volte.
+\end{itemize}
+
+
+\clearpage
+\section{0-1 Knapsack}
+Il problema dello \emph{0-1 Knapsack} si differenzia dal problema del \emph{Fractional Knapsack} (Capitolo \ref{cap:Greedy}) per il fatto che ogni oggetto può essere inserito nello zaino solo per intero e non in frazioni. In altre parole, ogni oggetto può essere inserito nello zaino solo per intero o non essere inserito affatto.
+
+\begin{itemize}
+    \item Dati $n$ oggetti, ciascuno con un volume $v_i$ e un costo/valore $c_i$, e un limite di volume $B$, trovare un sottoinsieme $S \subseteq \{1, \ldots, n\}$ di oggetti con volume totale al più $B$ tale che il costo totale sia massimizzato.
+\end{itemize}
+
+\noindent
+Come già accennato in precedenza, il problema dello 0-1 Knapsack non può essere risolto in modo ottimale utilizzando un approccio greedy, poiché la scelta dell'oggetto con il miglior rapporto costo/volume non garantisce una soluzione ottimale globale, ma questa soluzione funzionava solo per il problema frazionario. Tuttavia, possiamo utilizzare un approccio di programmazione dinamica per risolvere questo problema in modo efficiente.
+
+\subsection*{Soluzione Dynamic Programming}
+Assumendo che i volumi $v_i$ siano interi positivi, definiamo i sotto-problemi come segue:
+\begin{itemize}
+    \item Considerimao solamente i primi $i$ oggetti $x_1, x_2, \ldots, x_i$, ed un volume massimo $j$ dello zaino, con $0 \leq i \leq n$ e $0 \leq j \leq B$.
+    \item Definiamo $V(i,j)$ come il valore massimo ottenibile utilizzando i primi $i$ oggetti con un volume massimo $j$ dello zaino.
+\end{itemize}
+
+\noindent
+Il valore di $V(i,j)$ dipende dalla scelta di includere o meno l'oggetto $x_i$ nello zaino:
+
+\begin{itemize}
+    \item $V(i,j) = V(i-1,j)$, se scegliamo di non inserire l'oggetto $x_i$ nello zaino.
+    \item $V(i,j) = c_i + V(i-1,j-v_i)$, se scegliamo di inserire l'oggetto $x_i$ nello zaino (a condizione che $v_i \leq j$).
+\end{itemize}
+
+\noindent
+Dal momento che vogliamo massimizzare il valore totale, l'\textbf{equazione caratteristica} diventa:
+
+$$
+V(i,j) = 
+\begin{cases}
+    \max(V(i-1,j), c_i + V(i-1,j-v_i)) & \text{se } v_i \leq j \\
+    V(i-1,j) & \text{se } v_i > j 
+\end{cases}
+$$
+
+\noindent
+Le boundary conditions sono le seguenti:
+\begin{itemize}[nosep]
+    \item $V(i,0) = 0$ per ogni $1 \leq i \leq n$, poiché se il volume dello zaino è zero, non possiamo inserire alcun oggetto.
+    \item $V(0,j) = 0$ per ogni $1 \leq j \leq B$, poiché se non abbiamo oggetti a disposizione, il valore massimo ottenibile è zero.
+    \item $V(1,j) = v_1$ se $v_1 \leq j$, altrimenti $V(1,j) = 0$, poiché con un solo oggetto possiamo inserirlo nello zaino solo se il suo volume è minore o uguale al volume massimo dello zaino. 
+\end{itemize}
+
+\clearpage
+Un algoritmo iterativo può riempire la matrice calcolando ogni voce in tempo costante. Alla fine, il costo della soluzione ottimale è riportato nella cella $V(n,B)$. Il tempo necessario da un algoritmo per riempire la tabella è $O(nB)$. 
+
+Per costruire una soluzione ottimale, possiamo anche costruire una matrice booleana $C$ della stessa dimensione $n \times (B + 1)$. Per ogni $1 \leq i \leq n$ e $0 \leq j \leq B$, $C(i,j) = \text{True}$ se e solo se esiste una soluzione ottimale che inserisce un sottoinsieme dei primi $i$ oggetti nel volume $j$ in modo che l'oggetto $i$ sia incluso nella soluzione. Utilizzando la matrice $C$ possiamo lavorare a ritroso per ricostruire gli elementi presenti in una soluzione ottimale. 
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/Dynamic/knapsack.png}
+    \caption{Esempio con $n = 9$ oggetti e limite di volume $B = 15$. La tabella $V$ presenta le righe stampate in ordine decrescente, ma questo non è un problema ma riguarda solo una scelta di impaginazione. La soluzione ottimale ha valore $V(9,15) = 23$, ottenuta selezionando gli oggetti: 9, 7, 5, 4}
+    \label{fig:knapsack}
+\end{figure}
+
+\clearpage
+\vspace{1\baselineskip}
+\hrule
+
+\begin{verbatim}
+    Input:
+        v: array dei volumi (v[1]...v[n])
+        c: array dei costi (c[1]...c[n])
+        B: capacità massima
+  Output:
+        V: Tabella delle soluzioni ottime
+        C: Tabella delle scelte (inclusione oggetto)
+------------------------------------------------------------------------
+ALGORITMO Knapsack01(v, c, B)
+ 1. n = lunghezza(v)
+ 2. for j = 0 to B do   // Inizializzazione riga 0 (nessun oggetto)
+ 3.     V[0, j] = 0
+ 4. for i = 0 to n do   // Inizializzazione colonna 0 (capacità 0)
+ 5.     V[i, 0] = 0
+    // Ciclo principale: i scorre gli oggetti, j le capacità
+ 6. for i = 1 to n do
+ 7.     for j = 1 to B do
+
+            // 1. L'oggetto i ha volume maggiore della capacità attuale j?
+            // Se sì, non entra fisicamente nello zaino.
+ 8.         if v[i] > j then
+ 9.             V[i, j] = V[i-1, j]
+10.             C[i, j] = False
+
+            // 2. L'oggetto entra, ma conviene prenderlo?
+            // Se il valore SENZA l'oggetto (V[i-1, j]) è MAGGIORE
+            // del valore CON l'oggetto, allora NON lo prendiamo.
+11.         else if V[i-1, j] > c[i] + V[i-1, j - v[i]] then
+12.             V[i, j] = V[i-1, j]
+13.             C[i, j] = False
+
+            // 3. L'oggetto entra e conviene prenderlo.
+            // (Il valore CON l'oggetto è maggiore o uguale al precedente).
+14.         else
+15.             V[i, j] = c[i] + V[i-1, j - v[i]]
+16.             C[i, j] = True
+
+17. return V, C
+\end{verbatim}
+
+\hrule 
+
+
+\clearpage
+
+
+
+
+
+
 
 
 

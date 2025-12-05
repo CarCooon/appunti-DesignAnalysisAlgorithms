@@ -51,4 +51,44 @@ Va detto però che un algoritmo di ricerca locale che sia efficiente non esiste 
 
 \clearpage
 \section{Vertex Cover}
+Consideriamo il problema del \textbf{Vertex Cover}. Siano dati un insieme $V$ di elementi e un insieme $E$ di coppie di elementi di $V$ (tutte le coppie di $E$ sono distinte, cioè differiscono almeno per un elemento). L'insieme $C$ delle possibili soluzioni è dato da tutti i sottoinsiemi (soluzioni) $S$ di $V$ tali che ogni coppia in $E$ ha almeno un elemento in $S$. Il costo di una soluzione $S$ è semplicemente la sua cardinalità, cioè il numero di elementi in $S$: $c(S) = |S|$.
+
+In altre parole, un \textbf{Vertex Cover} è un sottoinsieme di elementi tale che ogni coppia ha al suo interno almeno uno degli elementi del sottoinsieme. L'obiettivo è trovare il Vertex Cover di dimensione minima.
+
+
+
+\paragraph{Esempio:} $V = \{\text{a,b,c,d,e}\}$ e $E = \{\text{(a,b), (a,c), (b,d), (c,d), (d,e)}\}$. Dei possibili Vertex Cover sono $S = \{\text{b,c,e}\}$, poiché ogni coppia in $E$ contiene almeno uno degli elementi in $S$, e il costo di questa soluzione è $c(S) = 3$. Un altro possibile Vertex Cover è $S' = \{\text{a,d}\}$, con costo $c(S') = 2$, che è migliore della soluzione precedente. Se prendiamo $S = \{\text{b,c}\}$, questa non è una soluzione valida perché la coppia (d,e) non è coperta.
+
+\vspace{1\baselineskip}
+\noindent
+Per applicare la ricerca locale al problema del Vertex Cover, dobbiamo definire una \emph{neighbor relation} efficace. Una semplice relazione può essere considerare come vicini due soluzioni che differiscono per l'aggiunta o la rimozione di un singolo elemento da $V$. In questo modo, ciascuna soluzione $S$ ha $n$ vicini, dove $n$ è la dimensione di $V$.
+\begin{itemize}[nosep]
+    \item È semplice notare questa proprietà considerando un esempio: se $V = \{\text{a,b,c,d,e}\}$ e $S = \{\text{b,c,e}\}$, i vicini di $S$ sono: $\text\{a,b,c,e\}, \text\{b,c,d,e\}, \text\{c,e\}, \text\{b,e\}, \text\{b,c\}$.
+\end{itemize}
+
+
+\subsection{Gradient Descent per Vertex Cover}
+L'algoritmo di ricerca locale più semplice possibile è il \textbf{Gradient Descent} (Discesa del Gradiente). In questo approccio, ad ogni iterazione, abbiamo una soluzione corrente $S$ e l'algoritmo esplora tutti i suoi vicini per poi scegliere il vicino $S'$ con il costo più basso tra quelli che migliorano la soluzione corrente (cioè quelli con $c(S') < c(S)$). Se non esistono vicini migliori, l'algoritmo termina e restituisce la soluzione corrente come risultato finale.
+
+Questo algoritmo è semplice ma può facilmente rimanere intrappolato in minimi lodali, poiché esplora solo i vicini che migliorano la soluzione corrente. Nel contesto del problema Vertex Cover, consideriamo un insieme $V$ di elementi e un insieme $E$ di coppie. L'algoritmo Gradient Descent viene inizializzato con $S=V$ e procede rimuovendo un elemento per volta fintanto che la condizione di copertura delle coppie rimane soddisfatta.
+
+\begin{itemize}
+    \item \textbf{Caso banale (Insieme $E$ vuoto):} Se non ci sono coppie da coprire, l'algoritmo rimuove correttamente tutti gli elementi fino a raggiungere l'insieme vuoto, che rappresenta il minimo globale.
+    
+    \item \textbf{Caso dell'Elemento "Centro":} Supponiamo che esista un elemento speciale $c \in V$ tale che $c$ è contenuto in ogni coppia di $E$.
+    \begin{itemize}
+        \item La soluzione ottima è data dal singleton $\{c\}$.
+        \item Se l'algoritmo rimuove $c$ nelle prime iterazioni, sarà costretto a mantenere in $S$ tutti gli altri elementi accoppiati con $c$ per garantire la copertura. Si raggiunge così un \textit{minimo locale} molto più costoso dell'ottimo globale, da cui non è possibile uscire poiché l'algoritmo non permette di reinserire elementi (poiché l'algoritmo aggiorna la soluzione solo se il costo diminuisce; il costo è dato dal numero di elementi in $S$ che quindi può solo diminuire).
+    \end{itemize}
+    
+    \item \textbf{Caso delle Coppie Sequenziali:} Consideriamo $V = \{v_1, \dots, v_n\}$ con coppie definite come $E = \{(v_1, v_2), (v_2, v_3), \dots, (v_{n-1}, v_n)\}$.
+    \begin{itemize}
+        \item La soluzione ottima consiste nel selezionare elementi alternati (es. $\{v_2, v_4, \dots\}$), ottenendo una cardinalità di circa $(n-1)/2$ .
+        \item L'algoritmo può invece convergere su minimi locali inefficienti, come ad esempio la configurazione $\{v_1, v_2, v_4, v_5, \dots\}$. Questa soluzione è valida e non riducibile (rimuovere un elemento scoprirebbe una coppia), ma ha una cardinalità di circa $2n/3$, risultando significativamente peggiore dell'ottimo .
+    \end{itemize}
+\end{itemize}
+
+
+
+
 

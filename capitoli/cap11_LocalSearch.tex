@@ -53,7 +53,7 @@ Va detto però che un algoritmo di ricerca locale che sia efficiente non esiste 
 \section{Vertex Cover}
 Consideriamo il problema del \textbf{Vertex Cover}. Siano dati un insieme $V$ di elementi e un insieme $E$ di coppie di elementi di $V$ (tutte le coppie di $E$ sono distinte, cioè differiscono almeno per un elemento). L'insieme $C$ delle possibili soluzioni è dato da tutti i sottoinsiemi (soluzioni) $S$ di $V$ tali che ogni coppia in $E$ ha almeno un elemento in $S$. Il costo di una soluzione $S$ è semplicemente la sua cardinalità, cioè il numero di elementi in $S$: $c(S) = |S|$.
 
-In altre parole, un \textbf{Vertex Cover} è un sottoinsieme di elementi tale che ogni coppia ha al suo interno almeno uno degli elementi del sottoinsieme. L'obiettivo è trovare il Vertex Cover di dimensione minima.
+In altre parole, un \textbf{Vertex Cover} è un sottoinsieme $S \subseteq V$ che ``copre'' tutte le coppie in $E$: questo significa che, per ogni coppia presente in $E$, \textbf{almeno uno dei due elementi} che la compongono deve appartenere alla soluzione $S$.
 
 
 
@@ -62,7 +62,7 @@ In altre parole, un \textbf{Vertex Cover} è un sottoinsieme di elementi tale ch
 \vspace{1\baselineskip}
 \noindent
 Per applicare la ricerca locale al problema del Vertex Cover, dobbiamo definire una \emph{neighbor relation} efficace. Una semplice relazione può essere considerare come vicini due soluzioni che differiscono per l'aggiunta o la rimozione di un singolo elemento da $V$. In questo modo, ciascuna soluzione $S$ ha $n$ vicini, dove $n$ è la dimensione di $V$.
-\begin{itemize}[nosep]
+\begin{itemize}
     \item È semplice notare questa proprietà considerando un esempio: se $V = \{\text{a,b,c,d,e}\}$ e $S = \{\text{b,c,e}\}$, i vicini di $S$ sono: $\text\{a,b,c,e\}, \text\{b,c,d,e\}, \text\{c,e\}, \text\{b,e\}, \text\{b,c\}$.
 \end{itemize}
 
@@ -72,6 +72,9 @@ L'algoritmo di ricerca locale più semplice possibile è il \textbf{Gradient Des
 
 Questo algoritmo è semplice ma può facilmente rimanere intrappolato in minimi lodali, poiché esplora solo i vicini che migliorano la soluzione corrente. Nel contesto del problema Vertex Cover, consideriamo un insieme $V$ di elementi e un insieme $E$ di coppie. L'algoritmo Gradient Descent viene inizializzato con $S=V$ e procede rimuovendo un elemento per volta fintanto che la condizione di copertura delle coppie rimane soddisfatta.
 
+Per valutare l'efficacia dell'algoritmo, analizziamo il suo comportamento in tre scenari distinti. Mentre l'approccio funziona correttamente in casi banali, mostra evidenti limiti e tendenza a bloccarsi in minimi locali non appena la struttura delle coppie diventa più complessa:
+
+\clearpage
 \begin{itemize}
     \item \textbf{Caso banale (Insieme $E$ vuoto):} Se non ci sono coppie da coprire, l'algoritmo rimuove correttamente tutti gli elementi fino a raggiungere l'insieme vuoto, che rappresenta il minimo globale.
     
@@ -89,6 +92,53 @@ Questo algoritmo è semplice ma può facilmente rimanere intrappolato in minimi 
 \end{itemize}
 
 
+\section{Algoritmo Metropolis}
+Come abbiamo visto con il Gradient Descent, l'approccio puramente "greedy" (che accetta solo miglioramenti) tende a rimanere intrappolato nei minimi locali. Per risolvere questo problema, è necessario introdurre un meccanismo che permetta all'algoritmo di accettare occasionalmente soluzioni peggiori, nella speranza che queste mosse "in salita" (uphill) permettano di scavalcare le barriere dei minimi locali e raggiungere il minimo globale.
+
+Questa intuizione è alla base dell'\textbf{Algoritmo Metropolis}, che simula il comportamento di un sistema fisico basandosi sui principi della meccanica statistica.
+L'idea fondamentale è che il processo di ricerca sia globalmente orientato verso passi "in discesa" (miglioramento del costo), ma occasionalmente compia passi "in salita" per uscire dai minimi locali.
+
+\clearpage
+\subsection{La Funzione di Gibbs-Boltzmann}
+L'algoritmo utilizza un'analogia fisica in cui ogni soluzione ammissibile $S$ corrisponde a uno stato del sistema, e la funzione di costo $c(S)$ corrisponde all'\emph{energia} $E$ di quello stato.
+La probabilità di trovare il sistema in un determinato stato con energia $E$ è modellata dalla \textbf{funzione di Gibbs-Boltzmann}:
+
+$$
+    e^{-E / (kT)}
+$$
+
+\begin{itemize}[nosep]
+    \item $E$ è l'energia (il costo) dello stato corrente.
+    \item $T > 0$ è la \emph{temperatura} del sistema.
+    \item $k$ è una costante (costante di Boltzmann).
+    \item La funzione rappresenta una probabilità, e infatti assume valori tra $0$ e $1$.
+\end{itemize}
+
+\vspace{1\baselineskip}
+\noindent
+Questa funzione è monotona decrescente rispetto all'energia $E$: ciò significa che il sistema ha una probabilità maggiore di trovarsi in stati a bassa energia (basso costo) rispetto a stati ad alta energia.
+Il parametro $T$ (temperatura) gioca un ruolo cruciale nel determinare il comportamento del sistema:
+\begin{itemize}
+    \item \textbf{Se $T$ è grande:} stati ad alta e bassa energia hanno approssimativamente la stessa probabilità. L'algoritmo esplora lo spazio delle soluzioni quasi casualmente.
+    \item \textbf{Se $T$ è piccolo:} gli stati a bassa energia sono molto più probabili. Il sistema tende a cristallizzarsi verso i minimi.
+\end{itemize}
+
+\subsection{Funzionamento dell'Algoritmo}
+L'algoritmo Metropolis utilizza questa distribuzione di probabilità per decidere se accettare o meno una nuova soluzione.
+Fissata una temperatura $T$, l'algoritmo mantiene uno stato corrente $S$ e procede come segue:
+
+\begin{enumerate}[nosep]
+    \item Viene generata una perturbazione casuale dello stato corrente $S$ per ottenere un nuovo stato vicino $S' \in N(S)$.
+    \item Si calcola la variazione di energia (costo): $\Delta E = E(S') - E(S) > 0$.
+    \item \textbf{Se $E(S') \le E(S)$:} la nuova soluzione è migliore (o uguale). L'algoritmo accetta sempre il cambiamento e aggiorna lo stato corrente a $S'$.
+    \item \textbf{Altrimenti ($E(S') > E(S)$):} la nuova soluzione è peggiore ($\Delta E > 0$). L'algoritmo accetta il nuovo stato $S'$ solo con una certa probabilità, data da:
+    \begin{equation}
+        P(\text{accettare } S') = e^{-\frac{\Delta E}{kT}}
+    \end{equation}
+\end{enumerate}
+
+\noindent
+L'intuizione fondamentale è che il processo di ricerca non è casuale ma pesato: in accordo con la distribuzione di Gibbs-Boltzmann, l'algoritmo tende a soffermarsi con maggiore frequenza negli stati a basso costo. Di conseguenza, pur potendo accettare peggioramenti momentanei, il sistema privilegia statisticamente le zone migliori, aumentando la probabilità di convergere verso l'ottimo globale.
 
 
 

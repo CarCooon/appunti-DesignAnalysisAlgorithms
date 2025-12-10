@@ -235,17 +235,19 @@ Questa operazione è chiamata "single-flip".
 
 \paragraph{Algoritmo Greedy.}
 Possiamo implementare un semplice algoritmo Greedy (o di ascesa del gradiente - Gradient Ascent -, dato che stiamo massimizzando) basato su questo vicinato:
-\begin{enumerate}
-    \item Si inizia con una partizione casuale $(A, B)$.
-    \item Si cerca un nodo $v$ che, se spostato nell'altro insieme, aumenta il costo totale del taglio (nodo migliorativo).
-    \item Se tale nodo esiste:
-    \begin{itemize}
-        \item Se $v \in A$, spostalo in $B$.
-        \item Altrimenti, spostalo in $A$.
-    \end{itemize}
-    \item Si ripete il passo 2 finché non esistono più nodi che migliorano la soluzione (raggiungimento di un ottimo locale).
-    \item Si restituisce la partizione finale $(A, B)$.
-\end{enumerate}
+
+\vspace{1\baselineskip}
+\hrule
+\begin{verbatim}
+1.  MaxCutLocal(G, w):
+2.      Inizializza una partizione casuale (A, B) di V
+3.      while esiste un nodo v che migliora il cut value:
+4.          if v in A:  Sposta v da A a B
+5.          else:       Sposta v da B a A
+6.      return (A, B)
+\end{verbatim}
+\hrule 
+\vspace{1\baselineskip}
 
 \noindent
 Anche in questo caso, l'approccio Greedy può bloccarsi in ottimi locali. Per ottenere risultati migliori, si possono applicare le euristiche viste in precedenza, come il Simulated Annealing, o definire intorni più complessi che spostano più nodi contemporaneamente.
@@ -303,8 +305,105 @@ In pratica, questo metodo permette di eseguire una lunga sequenza di flip in un 
 
 
 
-
 \clearpage
 \section{Hopfield Neural Networks}
+Le \textbf{Reti Neurali di Hopfield} (Hopfield Neural Networks) rappresentano un modello semplice di memoria associativa, in cui una vasta collezione di unità (neuroni) è connessa da una rete sottostante, e le unità vicine cercano di correlare i propri stati.
+Il problema può essere modellato come segue:
 
+\begin{itemize}
+    \item \textbf{Input:} Un insieme $V$ di unità (nodi) e un insieme $E$ di coppie (archi).
+    \item \textbf{Pesi:} Ogni coppia $e \in E$ possiede un peso intero $w_e$, che può essere positivo o negativo.
+    \item \textbf{Soluzioni Ammissibili ($C$):} Una configurazione è un assegnamento di uno stato $s_u \in \{+1, -1\}$ ad ogni unità $u \in V$.
+\end{itemize}
+
+\subsection{Configurazioni Stabili}
+L'obiettivo in una rete di Hopfield non è necessariamente massimizzare o minimizzare una funzione globale in modo diretto, ma trovare una configurazione che sia "stabile", ovvero in cui nessun nodo ha incentivo a cambiare stato dato lo stato dei suoi vicini.
+
+\noindent
+L'intuizione fisica dietro ai pesi è la seguente:
+\begin{itemize}
+    \item Se $w_{uv} < 0$, allora $u$ e $v$ "vogliono" avere lo stesso stato (entrambi $+1$ o entrambi $-1$).
+    \item Se $w_{uv} > 0$, allora $u$ e $v$ "vogliono" avere stati diversi.
+\end{itemize}
+
+\noindent
+Formalizziamo questo concetto definendo la qualità dei singoli archi e nodi:
+\begin{itemize}
+    \item \textbf{Arco Buono (Good Edge):} Un arco $e=(u,v)$ si dice buono rispetto a una configurazione $S$ se il prodotto del peso per gli stati è negativo:
+    $$ w_e s_u s_v < 0 $$
+    Questa è una quantità negativa se si tratta di un arco buono, positiva altrimenti.
+    \begin{itemize}
+        \item Si ha un arco buono se $w_e < 0$ e $s_u = s_v$, oppure se $w_e > 0$ e $s_u \neq s_v$.
+    \end{itemize}
+    
+    \item \textbf{Nodo Soddisfatto (Satisfied Node):} Un nodo $u$ è soddisfatto se il peso assoluto degli archi incidenti "buoni" è maggiore o uguale al peso degli archi incidenti "cattivi". Formalmente, la condizione è:
+    $$
+        \sum_{v: e=(u,v) \in E} w_{uv} s_u s_v \leq 0
+    $$
+    
+    \item \textbf{Configurazione Stabile:} Una configurazione è stabile se \textbf{tutti} i nodi della rete sono soddisfatti.
+\end{itemize}
+
+\noindent
+L'obiettivo del problema di ricerca è trovare una configurazione stabile, se ne esiste una.
+
+\clearpage
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{immagini/LocalSearch/node_satisfied.png}
+    \caption{Esempio di nodo soddisfatto.}
+    \label{fig:node_satisfied}
+\end{figure}
+
+\subsection{Algoritmo State-Flipping}
+Per trovare una configurazione stabile, utilizziamo un algoritmo di ricerca locale chiamato \textbf{State-flipping Algorithm}.
+La logica è estremamente semplice: partendo da una configurazione arbitraria, finché la rete non è stabile, si sceglie un nodo insoddisfatto e si inverte il suo stato.
+
+\vspace{1\baselineskip}
+\hrule
+\begin{verbatim}
+1.  HopfieldFlip(G, w):
+2.      S = configurazione arbitraria
+3.      while esiste un nodo insoddisfatto u in S:
+4.          s_u = -s_u  # Inverti lo stato di u
+5.      return S
+\end{verbatim}
+\hrule 
+\vspace{1\baselineskip}
+
+
+\paragraph{Esempio di esecuzione.}
+Consideriamo un nodo con stato $-1$ connesso ad altri nodi. Se il "peso" dei conflitti (archi cattivi) supera quello degli accordi, il nodo inverte il suo stato a $+1$. Questo cambiamento rende "buoni" gli archi incidenti che prima erano cattivi, e viceversa.
+
+\subsection{Convergenza e Complessità}
+Una domanda fondamentale è: l'algoritmo termina sempre o può entrare in un ciclo infinito di cambi di stato?
+È possibile dimostrare che l'algoritmo termina sempre.
+
+\paragraph{Teorema di Convergenza.}
+L'algoritmo State-flipping termina con una configurazione stabile dopo al più $W = \sum_{e} |w_e|$ iterazioni.
+
+\paragraph{Dimostrazione.}
+Consideriamo una funzione potenziale $\Phi(S)$ definita come la somma dei pesi assoluti di tutti gli archi "buoni" nella configurazione corrente:
+$$ \Phi(S) = \sum_{e \text{ good}} |w_e| $$
+Chiaramente, il valore minimo di questa funzione è 0 e il massimo è $W$.
+Dobbiamo mostrare che $\Phi(S)$ aumenta di almeno 1 ad ogni flip:
+\begin{itemize}
+    \item Quando un nodo insoddisfatto $u$ cambia stato:
+    \begin{itemize}
+        \item Tutti gli archi "buoni" incidenti a $u$ diventano "cattivi".
+        \item Tutti gli archi "cattivi" incidenti a $u$ diventano "buoni".
+        \item Gli archi non incidenti a $u$ non cambiano.
+    \end{itemize}
+    \item Poiché $u$ era insoddisfatto, per definizione il peso degli archi cattivi incidenti era maggiore di quelli buoni.
+    \item Di conseguenza, scambiando i due insiemi, il guadagno in termini di peso degli archi buoni supera la perdita:
+    $$ \Phi(S') \ge \Phi(S) + 1 $$
+\end{itemize}
+Poiché la funzione potenziale è limitata superiormente e cresce strettamente ad ogni passo, l'algoritmo deve terminare.
+
+\paragraph{Note sulla complessità.}
+Sebbene la convergenza sia garantita, il numero di passi può essere molto grande.
+\begin{itemize}
+    \item Il \textbf{problema decisionale} ("Esiste una configurazione stabile?") è banale: la risposta è sempre sì, poiché l'algoritmo ne trova sempre una.
+    \item Il \textbf{problema di ricerca} ("Trova una configurazione stabile") appartiene alla classe \textbf{PLS} (Polynomial Local Search). Non è noto alcun algoritmo in tempo polinomiale (nel caso peggiore) per risolvere questo problema.
+\end{itemize}
 

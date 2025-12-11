@@ -1,13 +1,212 @@
 \chapter{Graphs}
 \label{cap:Graphs}
 
+Un \textbf{grafo} è una struttura matematica che può essere utilizzata per rappresentare un insieme di relazioni binarie tra coppie di oggetti in una collezione: gli oggetti sono chiamati \textbf{vertici} (o nodi) e le relazioni tra di essi sono chiamate \textbf{archi}. 
+
+\paragraph{Definizione:} Un grafo $G$ è una coppia ordinata $(V,E)$ dove $V = \{v_1, v_2, \ldots, v_n\}$ è un insieme non vuoto di vertici e $E = \{u, v\}$ è una collezione di coppie di vertici (archi) di $V$. 
+
+\noindent
+Un arco può essere \emph{orientato} o \emph{non orientato}. \begin{itemize}[nosep]
+    \item Un arco $(u,v)$ è orientato se la coppia $(u,v)$ è ordinata, con $u$ che precede $v$. Il primo vertice, $u$, è chiamato \emph{sorgente} e il secondo vertice, $v$, è chiamato \emph{destinazione}. Rappresenta una relazione unidirezionale (asimmetrica) da $u$ a $v$.
+    \item Un arco $(u,v)$ è non orientato se la coppia $(u,v)$ non è ordinata. Entrambi i vertici sono chiamati \emph{estremi} dell'arco. Rappresenta una relazione bidirezionale (simmetrica) tra $u$ e $v$.
+\end{itemize}
+
+\noindent
+Se tutti gli archi di un grafo sono orientati, allora si dice che il grafo è un \emph{grafo orientato}. Allo stesso modo, un \emph{grafo non orientato} è un grafo i cui archi sono tutti non orientati. Un grafo che ha sia archi orientati che non orientati è chiamato \emph{grafo misto}.
+
+\vspace{2\baselineskip}
+\noindent
+La teoria dei grafi rappresenta una pietra miliare dell'informatica teorica e applicata, offrendo un linguaggio formale per modellare le relazioni tra oggetti. Questa struttura è onnipresente: dai \textit{social network}, dove i nodi rappresentano gli utenti e gli archi le amicizie, alle reti di calcolatori e ai sistemi di navigazione satellitare. Algoritmi fondamentali, come quello di \textbf{Dijkstra} per il calcolo del cammino minimo o l'algoritmo \textbf{PageRank} di Google, si basano interamente sulle proprietà topologiche dei grafi. Senza l'astrazione fornita dai grafi, la risoluzione efficiente di problemi complessi di connettività, flusso e ottimizzazione sarebbe pressoché impossibile.
 
 
 
+\clearpage
+\paragraph{Terminologia sui Grafi:}
+Con riferimento al grafo mostrato in Figura \ref{fig:term_graph}:
+\begin{itemize}[nosep]
+    \item \textbf{Estremi di un arco}: Gli estremi di un arco sono i vertici collegati dallo stesso arco. $u$ e $v$ sono gli estremi dell'arco $a$. 
+    \item \textbf{Vertici adiacenti}: Due vertici sono adiacenti se esiste un arco che li collega. $u$ e $v$ sono vertici adiacenti. 
+    \item \textbf{Archi incidenti in un vertice}: Gli archi incidenti in un vertice sono gli archi che hanno quel vertice come estremo. $a$, $b$, $d$ sono archi incidenti in $v$. 
+    \item \textbf{Grado di un vertice}: Il grado di un vertice $v$ è il numero di archi incidenti in $v$. $x$ ha grado 5.
+    \item \textbf{Archi paralleli}: Due archi sono paralleli se collegano gli stessi vertici. $h$ e $i$ sono archi paralleli.
+\end{itemize}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.4\textwidth]{immagini/Graphs/term_graph.png}
+    \caption{}
+    \label{fig:term_graph}
+\end{figure}
+
+
+\paragraph{Terminologia sui Grafi Orientati:}
+Con riferimento al grafo mostrato in Figura \ref{fig:term_digraph}:
+\begin{itemize}[nosep]
+    \item \textbf{Archi entranti in un vertice}: Gli archi entranti in un vertice sono gli archi che hanno quel vertice come destinazione. $b$, $e$, $h$ sono archi entranti in $x$.
+    \item \textbf{Archi uscenti da un vertice}: Gli archi uscenti da un vertice sono gli archi che hanno quel vertice come sorgente. $g$, $i$, sono archi uscenti da $x$.
+    \item \textbf{In-degree}: L'in-degree di un vertice è il numero di archi entranti in esso. $x$ ha in-degree 3.
+    \item \textbf{Out-degree}: L'out-degree di un vertice è il numero di archi uscenti da esso. $vx$ ha out-degree 3.
+\end{itemize}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.4\textwidth]{immagini/Graphs/term_digraph.png}
+    \caption{}
+    \label{fig:term_digraph}
+\end{figure}
+
+
+\clearpage
+\noindent
+Un \textbf{cammino} (o percorso, path) in un grafo è una sequenza di vertici collegati da archi, ovvero una sequenza di vertici $(v_1, v_2, \ldots, v_k)$ tale che $(v_i, v_{i+1})$ è un arco del grafo, per $i = 1, 2, \ldots, k-1$. 
+È anche possibile vedere un cammino come una sequenza di archi $(e_1, e_2, \ldots, e_{k-1})$ tale che l'estremo di destinazione di $e_i$ è l'estremo sorgente di $e_{i+1}$, per $i = 1, 2, \ldots, k-1$.
+Un \textbf{cammino semplice} non visita uno stesso vertice più di una volta. 
+
+
+Un \textbf{cammino orientato} in un grafo orientato è una sequenza di vertici $(v_1, v_2, \ldots, v_k)$ tale che ogni arco $(v_i, v_{i+1})$ è un arco orientato del grafo, per $i = 1, 2, \ldots, k-1$.
+
+\begin{figure}[!ht]
+    \centering
+    % Inizio prima figura (sinistra)
+    \begin{minipage}[t]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{immagini/Graphs/term_paths.png}
+        \caption{$P_1 = (v, x, z)$ è un cammino semplice; $P_2 = (u, w, x, y, w, v)$ è un cammino ma non semplice.}
+        \label{fig:term_paths}
+    \end{minipage}
+    \hfill % Spazio flessibile tra le due figure
+    % Inizio seconda figura (destra)
+    \begin{minipage}[t]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{immagini/Graphs/term_paths1.png}
+        \caption{$P_1 = (v, x, z)$ è un cammino orientato semplice; $P_2 = (u, w, x, y, w, v)$ è un cammino orientato ma non semplice.}
+        \label{fig:term_paths1}
+    \end{minipage}
+\end{figure}
+
+
+\noindent
+Un \textbf{ciclo} in un grafo è un cammino che inizia e termina nello stesso vertice, con almeno un arco. Un \textbf{ciclo semplice} non visita uno stesso vertice più di una volta, ad eccezione del vertice iniziale/finale. Un \textbf{auto-ciclo} è un ciclo che consiste in un singolo arco che collega un vertice a se stesso.
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.4\textwidth]{immagini/Graphs/term_loops.png}
+    \caption{$C_1 = (v, x, y, w, u, v)$ è un ciclo semplice; $C_2 = (u, w, x, y, w, v, u)$ è un ciclo ma non semplice.}
+    \label{fig:term_loops}
+\end{figure}
+
+
+\clearpage
+\section*{Proprietà di un Grafo non orientato}
+Siano $n$ il numero di vertici e $m$ il numero di archi di un grafo non orientato (Figura \ref{fig:prop_graph}).
+\begin{enumerate}
+    \item $\sum\limits_{v \in V} \text{deg}(v) = 2m$, dove la somma è calcolata su tutti i vertici $v$ del grafo. 
+    \begin{itemize}
+        \item Questo perché ogni arco contribuisce a incrementare il grado di due vertici.
+    \end{itemize}
+    \item In un grafo non orientato senza archi paralleli e auto-cicli, il numero massimo di archi è dato da $m \le \frac{n(n-1)}{2}$. 
+    \begin{itemize}
+        \item Per via delle ipotesi di cui sopra, ciascun nodo può avere grado massimo $(\le) n-1$. Riprendendo la proprietà precedente, si ha quindi che $2m \le n(n-1)$.
+    \end{itemize}
+\end{enumerate}
+
+\vspace{1\baselineskip}
+\begin{figure}[!ht]
+    \centering
+    % Inizio prima figura (sinistra)
+    \begin{minipage}[t]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{immagini/Graphs/prop_graph.png}
+        \caption{}
+        \label{fig:prop_graph}
+    \end{minipage}
+    \hfill % Spazio flessibile tra le due figure
+    % Inizio seconda figura (destra)
+    \begin{minipage}[t]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{immagini/Graphs/prop_digraph.png}
+        \caption{}
+        \label{fig:prop_digraph}
+    \end{minipage}
+\end{figure}
+
+
+\section*{Proprietà di un Grafo orientato}
+Siano $n$ il numero di vertici e $m$ il numero di archi di un grafo orientato (Figura \ref{fig:prop_digraph}).
+\begin{enumerate}
+    \item $\sum\limits_{v \in V} \text{in-deg}(v) = \sum\limits_{v \in V} \text{out-deg}(v) = m$, dove la somma è calcolata su tutti i vertici del grafo.
+    \begin{itemize}
+        \item Questo perché ogni arco contribuisce di uno all'in-degree di un vertice e di uno all'out-degree di un altro vertice.
+    \end{itemize}
+    \item In un grafo non orientato senza archi paralleli e auto-cicli, il numero massimo di archi è dato da $m \le n(n-1)$. 
+    \begin{itemize}
+        \item Per via delle ipotesi di cui sopra, ciascun nodo può avere grado massimo $(\le) n-1$. Riprendendo la proprietà precedente, si ha quindi che $m \le n(n-1)$.
+    \end{itemize}
+\end{enumerate}
+
+
+\clearpage
+\noindent
+Due vertici $u,v$ di un grafo (orientato) sono \textbf{connessi} se esiste un cammino (orientato) da $u$ a $v$. In un grafo non orientato, la \emph{connettività} è una relazione simmetrica. In un grafo orientato, invece, la connettività non è necessariamente simmetrica: potrebbe esistere un cammino da $u$ a $v$ ma non da $v$ a $u$.
+
+Un grafo si dice \textbf{connesso} se, per ogni coppia di vertici, esiste un cammino tra di essi. Un grafo orientato è \textbf{fortemente connesso} se per ogni coppia di vertici $u,v$, $u$ raggiunge $v$ e $v$ raggiunge $u$.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{immagini/Graphs/connectivity.png}
+    \caption{Esempi di grafi connessi e non connessi.}
+    \label{fig:connectivity}
+\end{figure}
+
+\vspace{1\baselineskip}
+\noindent
+Una \textbf{forest} è un grafo non orientato e aciclico (ovvero privo di cicli). Un \textbf{tree} è una forest connessa. In altre parole, un tree è un grafo non orientato, aciclico e connesso.
+
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{immagini/Graphs/tree_forest.png}
+    \caption{Esempi di tree e forest.}
+    \label{fig:tree_forest}
+\end{figure}
+
+\noindent
+Un \textbf{sottografo} $H$ di un grafo $G = (V,E)$ è un grafo $H = (V', E')$ tale che $V' \subseteq V$ e $E' \subseteq E$. In altre parole, un sottografo è ottenuto rimuovendo vertici e/o archi da $G$. Uno \textbf{spanning subgraph} (la traduzione corretta è "sottografo ricoprente") di un grafo $G = (V,E)$ è un sottografo $H = (V', E')$ tale che $V' = V$. In altre parole, uno spanning subgraph contiene tutti i vertici di $G$, ma potrebbe non contenere tutti gli archi di $G$. 
+
+Uno \textbf{spanning tree} di un grafo è uno spanning subgraph che è anche un tree (ricordiamo, tree = grafo non orientato, aciclico e connesso).
+
+
+\vspace{1\baselineskip}
+\noindent
+Dato un grafo non orientato $G$ con $n$ vertici e $m$ archi:
+\begin{itemize}[nosep]
+    \item Se $G$ è connesso, allora $m \ge n-1$.
+    \item Se $G$ è una forest, allora $m \le n-1$.
+    \item Se $G$ è un tree, allora $m = n-1$.
+\end{itemize}
 
 
 
+\clearpage
+\section{Rappresentazioni dell'ADT Grafo}
+Esistono diverse rappresentazioni possibili di un grafo. In ognuna di esse, mantieniamo una collezione per memorizzare i vertici di un grafo. Tuttavia, le rappresentazioni differiscono notevolmente nel modo in cui organizzano gli archi.
 
+\begin{itemize}
+    \item \textbf{Edge List}: in un edge list, manteniamo una lista non ordinata di tutti gli archi. Questo è il minimo indispensabile, ma non esiste un modo efficiente per localizzare un particolare arco (u,v), o l'insieme di tutti gli archi incidenti a un vertice v.
+    \item \textbf{Adjacency List}: in un adjacency list, manteniamo, per ogni vertice, una lista separata contenente quegli archi che sono incidenti al vertice. L'insieme completo degli archi può essere determinato prendendo l'unione dei set più piccoli, mentre l'organizzazione consente di trovare in modo più efficiente tutti gli archi incidenti a un dato vertice.
+    \item \textbf{Adjacency Map}: un adjacency map è molto simile a un adjacency list, ma il contenitore secondario di tutti gli archi incidenti a un vertice è organizzato come una mappa, anziché come una lista, con il vertice adiacente che funge da chiave. Ciò consente l'accesso a un arco specifico (u,v) in tempo O(1) atteso.
+    \item \textbf{Adjacency Matrix}: un adjacency matrix fornisce un accesso nel caso peggiore O(1) a un arco specifico (u,v) mantenendo una matrice n×n, per un grafo con n vertici. Ogni voce è dedicata a memorizzare un riferimento all'arco (u,v) per una particolare coppia di vertici u e v; se non esiste tale arco, la voce sarà None.
+\end{itemize}
+
+\vspace{1\baselineskip}
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/Graphs/adt_graph.png}
+    \caption{Un riepilogo dei tempi di esecuzione per i metodi dell'ADT grafo, utilizzando le rappresentazioni del grafo discusse in questa sezione. Indichiamo con $n$ il numero di vertici, $m$ il numero di archi, e $d_v$ il grado del vertice $v$. Si noti che la matrice di adiacenza utilizza uno spazio $O(n^2)$, mentre tutte le altre strutture utilizzano uno spazio $O(n+m)$.}
+    \label{fig:adt_graph}
+\end{figure}
+
+
+\clearpage
 
 
 

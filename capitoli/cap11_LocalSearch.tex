@@ -396,9 +396,9 @@ Dobbiamo mostrare che $\Phi(S)$ aumenta di almeno 1 ad ogni flip:
     \end{itemize}
     \item Poiché $u$ era insoddisfatto, per definizione il peso degli archi cattivi incidenti era maggiore di quelli buoni.
     \item Di conseguenza, scambiando i due insiemi, il guadagno in termini di peso degli archi buoni supera la perdita:
-    $$ \Phi(S') \ge \Phi(S) + 1 $$
+    $$ \Phi(S') \ge 1 + \Phi(S) $$
 \end{itemize}
-Poiché la funzione $\Phi$ è limitata superiormente e cresce strettamente ad ogni passo, l'algoritmo deve terminare al più in un numero finito di passi $W$.
+Poiché la funzione $\Phi$ è limitata superiormente e cresce strettamente ad ogni passo (cioè fino a quando ci sono nodi insoddisfatti da flippare), l'algoritmo deve terminare al più in un numero finito di passi $W$.
 
 
 

@@ -229,12 +229,44 @@ Per supportare i metodi dell'ADT Grafo, assumiamo le seguenti caratteristiche ag
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=0.8\textwidth]{immagini/Graphs/summary_edgeList.png}
-    \caption{Riepilogo tempi di esecuzione l'ADT Grafo con rappresentazione Edge List.}
+    \caption{Riepilogo tempi di esecuzione ADT Grafo con rappresentazione Edge List.}
     \label{fig:summary_edgeList}
 \end{figure}
 
 
 
+
+\clearpage
+\section{Rappresentazione mediante Adjacency List}
+Diversamente dall'edge list, l'\emph{adjacency list} è una rappresentazione di un grafo che organizza gli archi in modo più strutturato, raggruppandoli per vertice. Ciascun vertice mantiene una collezione separata di archi incidenti, consentendo un accesso più efficiente agli archi associati a un particolare vertice. Più di preciso, ogni vertice $v$ del grafo mantiene una collezione $I(v)$, chiamata \emph{incidence collection} di $v$. (Nel caso di un grafo orientato, gli archi in uscita e in entrata possono essere memorizzati rispettivamente in due collezioni separate, $I_{out}(v)$ e $I_{in}(v)$.) Tradizionalmente, la collezione di incidenza $I(v)$ per un vertice $v$ è una lista, motivo per cui chiamiamo questo modo di rappresentare un grafo la struttura \emph{adjacency list}. 
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{immagini/Graphs/adj_list.png}
+    \caption{(a) Un grafo non orientato $G$; (b) una rappresentazione schematica della struttura adjacency list per $G$. La collezione $V$ è la lista primaria di vertici, e ogni vertice ha una lista associata di archi incidenti. Sebbene non sia mostrato in figura, presumiamo che ogni arco del grafo sia rappresentato con un'istanza di Edge unica che mantiene riferimenti ai suoi vertici estremi.}
+    \label{fig:adj_list}
+\end{figure}
+
+\noindent
+Richiediamo che la struttura primaria per un adjacency list mantenga la collezione $V$ di vertici in modo tale da poter localizzare la struttura secondaria $I(v)$ per un dato vertice $v$ in tempo $O(1)$. Ciò potrebbe essere fatto utilizzando una positional list per rappresentare $V$, con ogni istanza di Vertex che mantiene un riferimento diretto alla sua collezione di incidenza $I(v)$. Se i vertici possono essere numerati in modo univoco da 0 a $n-1$, potremmo invece utilizzare una struttura primaria basata su array per accedere alle liste secondarie appropriate. Il vantaggio principale di un adjacency list è che la collezione $I(v)$ contiene esattamente quegli archi che dovrebbero essere riportati dal metodo \texttt{incident\_edges(v)}. Pertanto, possiamo implementare questo metodo iterando sugli archi di $I(v)$ in tempo $O(\text{deg}(v))$, dove $\text{deg}(v)$ è il grado del vertice $v$. Questo è il miglior risultato possibile per qualsiasi rappresentazione di grafo, poiché ci sono $\text{deg}(v)$ archi da riportare.
+
+\clearpage
+\noindent
+L'utilizzo primario di questa rappresentazione riguarda i \textbf{grafi sparsi} \footnote
+{Un \textbf{grafo sparso} è un grafo che ha un numero di archi (collegamenti) significativamente inferiore rispetto al numero massimo possibile, ovvero quando il numero di archi \(m\) è dell'ordine di \(O(n)\) (lineare) rispetto al numero di vertici \(n\), mentre un \textbf{grafo denso} ha \(m\approx O(n^{2})\) (quadratico). In pratica, i grafi sparsi hanno poche connessioni tra i nodi, rendendo le rappresentazioni come le liste di adiacenza più efficienti in termini di spazio rispetto alle matrici di adiacenza.}, 
+tipici di reti reali (web, social network, mappe stradali), dove la maggior parte delle coppie di nodi non è collegata. Risulta inoltre ottimale per algoritmi che richiedono l'esplorazione sistematica dei vicini di un nodo. Lo svantaggio riguarda la verifica dell'esistenza di uno specifico arco tra due nodi: tale operazione non è istantanea, ma richiede una ricerca all'interno della collezione di adiacenza del vertice, con un tempo di esecuzione che cresce all'aumentare del numero di vicini del nodo stesso.
+
+\vspace{1\baselineskip}
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/Graphs/summary_adjList.png}
+    \caption{Riepilogo tempi di esecuzione ADT Grafo con rappresentazione Adjacency List.}
+    \label{fig:summary_adjList}
+\end{figure}
+
+
+\clearpage
+\section{Rappresentazione mediante Adjacency Map}
 
 
 

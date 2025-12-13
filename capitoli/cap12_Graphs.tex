@@ -487,14 +487,14 @@ class Graph:
         
         # For every neighbor w connected by an outgoing edge (v -> w),
         # remove the link back to v from w's incoming map.
-        for w in self._outgoing[v]:
+        for w in list(self._outgoing[v]):
             del self._incoming[w][v]
             
         # If the graph is directed, we also need to handle incoming edges (u -> v).
         # We must remove the link to v from u's outgoing map.
         # (In an undirected graph, _incoming is _outgoing, so the loop above covered this).
         if self.is_directed():
-            for u in self._incoming[v]:
+            for u in list(self._incoming[v]):
                 del self._outgoing[u][v]
         
         # Phase 2: Remove v from the graph's internal dictionaries.

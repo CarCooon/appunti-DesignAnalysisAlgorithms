@@ -1,3 +1,32 @@
 \chapter{Graphs Traversal}
 \label{cap:GraphsTraversal}
 
+Un \textbf{graph traversal algorithms} (algoritmo di attraversamento dei grafi) è una procedura sistematica per esplorare un grafo esaminando tutti i suoi vertici e archi. Un algoritmo di graph traversal è efficiente se visita tutti i vertici e archi in un tempo proporzionale al loro numero, cioè in tempo lineare
+
+Gli algoritmi di graph traversal sono fondamentali per rispondere a molte domande fondamentali sui grafi che coinvolgono la nozione di \emph{raggiungibilità}, cioè nel determinare come viaggiare da un vertice all'altro seguendo i percorsi di un grafo. 
+
+Gli algoritmi di graph traversal più utilizzati sono la \textbf{depth-first search} (DFS, ricerca in profondità) e la \textbf{breadth-first search} (BFS, ricerca in ampiezza). Entrambi gli algoritmi iniziano da un vertice di partenza e visitano sistematicamente tutti i vertici raggiungibili da quel vertice, ma lo fanno in modi diversi come vedremo più avanti.
+
+
+\vspace{1\baselineskip}
+\noindent
+Alcuni problemi interessanti che trattano la raggiungibilità in un grafo non orientato $G$ includono i seguenti:
+\begin{itemize}
+    \item Calcolare un percorso dal vertice $u$ al vertice $v$, o segnalare che non esiste tale percorso.
+    \item Dato un vertice di partenza $s$ di $G$, calcolare, per ogni vertice $v$ di $G$, un percorso con il numero minimo di archi tra $s$ e $v$, o segnalare che non esiste tale percorso.
+    \item Verificare se $G$ è connesso.
+    \item Calcolare un albero di copertura (spanning tree) di $G$, se $G$ è connesso.
+\end{itemize}
+
+\noindent
+Alcuni riguardano in modo specifico i grafi orientati.
+\begin{itemize}
+    \item Calcolare un percorso diretto dal vertice $u$ al vertice $v$, o segnalare che non esiste tale percorso.
+    \item Trovare tutti i vertici di $G$ raggiungibili da un dato vertice $s$.
+    \item Determinare se $G$ è aciclico.
+    \item Determinare se $G$ è fortemente connesso.
+\end{itemize}
+
+\clearpage
+\section{Depth-First Search (DFS)}
+

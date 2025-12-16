@@ -29,4 +29,53 @@ Alcuni riguardano in modo specifico i grafi orientati.
 
 \clearpage
 \section{Depth-First Search (DFS)}
+La \textbf{Depth-First Search} (DFS) è una tecnica generale per l'attraversamento dei grafi che esplora "in profondità": parte da un nodo radice e avanza lungo ogni ramo il più possibile prima di tornare indietro (backtracking). 
+
+L'algoritmo DFS applicato ad un grafo con $n$ vertici e $m$ archi visita tutti i vertici e archi del grafo in tempo $O(n + m)$.
+In particolare, la DFS può essere usata per verificare se $G$ è connesso, calcolare le \emph{connected components} \footnote
+{Una \textbf{connected component} (componente connessa) è un sottografo massimale di un \emph{grafo non orientato} in cui ogni coppia di vertici è collegata da almeno un cammino, e che non può essere esteso aggiungendo altri vertici del grafo mantenendo tale proprietà.} 
+di $G$ e calcolare uno \emph{spanning forest}\footnote
+{Uno \textbf{spanning tree} è un sottoinsieme di archi che connette tutti i vertici di un grafo connesso senza cicli.
+Uno \textbf{spanning forest} è un insieme di spanning tree, uno per ciascuna componente connessa di un grafo non connesso.
+L'algoritmo DFS genera uno spanning tree se il grafo è connesso; se il grafo non è connesso, eseguita su tutte le componenti, genera uno spanning forest.
+} 
+di $G$.
+
+
+\begin{itemize}
+    \item \textbf{DFS su un singolo vertice in un grafo non connesso:} visita solamente i vertici della \emph{connected component} contenente il vertice di partenza e costruisce uno \emph{spanning tree} di tale componente. Non permette di visitare tutti i vertici del grafo, né di verificare la connettività globale o calcolare tutte le connected components.
+    
+    \item \textbf{DFS su tutti i vertici non ancora visitati in un grafo non connesso:} eseguendo DFS partendo da ciascun vertice non visitato si visitano tutti i vertici del grafo. Questo procedimento permette di calcolare tutte le \emph{connected components} e di costruire uno \emph{spanning forest} del grafo. Inoltre, se una singola DFS visita tutti i vertici, il grafo è connesso.
+    
+    \item \textbf{DFS su un singolo vertice in un grafo connesso:} in questo caso l'esecuzione di DFS sul vertice di partenza visita tutti i vertici del grafo, costruendo uno \emph{spanning tree} dell'intero grafo e permettendo di verificare la connettività globale.
+\end{itemize}
+
+\vspace{1\baselineskip}
+\noindent
+L'idea di base dell'algoritmo DFS è la seguente:
+\begin{itemize}
+    \item DFS inizia da un vertice sorgente $s$ e marca $s$ come visitato.
+    \item Quando DFS arriva in un vertice $u$ non ancora visitato:
+    \begin{itemize}[nosep]
+        \item Se esiste un arco $(u, v)$ che conduce a un vertice $v$ non ancora visitato, DFS prende tale arco, marca $v$ come visitato e applica ricorsivamente lo stesso algoritmo su $v$.
+        \item Se non ci sono archi che conducono a vertici non ancora visitati, DFS torna indietro lungo il percorso fino a raggiungere un vertice che ha dei vicini non ancora visitati.
+        \end{itemize}
+    \item Quando una chiamata DFS termina:
+    \begin{itemize}[nosep]
+        \item Se ci sono vertici non ancora visitati, se ne sceglie uno e si ripete il processo. Ogni chiamata DFS completa esplora una singola \emph{connected component}.
+        \item Se tutti i vertici sono stati visitati, l'algoritmo termina.
+    \end{itemize}
+\end{itemize}
+
+
+\clearpage
+
+
+
+
+
+
+
+
+
 

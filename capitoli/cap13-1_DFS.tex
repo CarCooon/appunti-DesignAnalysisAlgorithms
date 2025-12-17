@@ -3,7 +3,7 @@
 
 La \textbf{Depth-First Search} (DFS) è una tecnica generale per l'attraversamento dei grafi che esplora "in profondità": parte da un nodo radice e avanza lungo ogni ramo il più possibile prima di tornare indietro (backtracking). 
 
-L'algoritmo DFS applicato ad un grafo con $n$ vertici e $m$ archi visita tutti i vertici e archi del grafo in tempo $O(n + m)$.
+L'algoritmo DFS applicato ad un grafo $G$ con $n$ vertici e $m$ archi visita tutti i vertici e archi del grafo in tempo $O(n + m)$.
 In particolare, la DFS può essere usata per verificare se $G$ è connesso, calcolare le \emph{connected components} \footnote
 {Una \textbf{connected component} (componente connessa) è un sottografo massimale di un \emph{grafo non orientato} in cui ogni coppia di vertici è collegata da almeno un cammino, e che non può essere esteso aggiungendo altri vertici del grafo mantenendo tale proprietà.} 
 di $G$ e calcolare uno \emph{spanning forest}\footnote
@@ -77,14 +77,11 @@ Output: labeling of the edges of G as discovery or back
 \hrule 
 \vspace{1\baselineskip}
 
-
-
-\vspace{1\baselineskip}
 \hrule
 \begin{verbatim}
 Input: graph G and a source vertex v
 Output: labels for the edges in the connected component 
-of G containing v
+ of G containing v
 1.  Algorithm DFS(G,v):
 2.    setLabel(v, VISITED)
 3.    for all e in G.incidentEdges(v)
@@ -95,13 +92,12 @@ of G containing v
 8.                DFS(G, w)
 9.            else
 10.               setLabel(e, BACK)
-
 \end{verbatim}
 \hrule 
 \vspace{1\baselineskip}
 
 \clearpage
-\begin{figure}
+\begin{figure}[!ht]
     \centering
     \includegraphics[width=0.97\textwidth]{immagini/GraphsTraversal/DFS_ex.png}
     \caption{Esempio di DFS su un grafo non orientato a partire dal vertice A. Supponiamo che le adiacenze di un vertice siano considerate in ordine alfabetico. I vertici visitati e gli archi esplorati sono evidenziati, con gli archi di scoperta (discovery) disegnati come linee solide e gli archi non appartenenti all'albero (back edges) come linee tratteggiate; i vertici e gli archi non evidenziati sono tutti unexplored: (a) grafo di input; (b) percorso degli archi dell'albero, tracciato da A fino a quando viene esaminato l'arco di back (G,C); (c) raggiungimento di F, che è un vicolo cieco; (d) dopo il backtracking a I, riprendendo con l'arco (I,M), e raggiungendo un altro vicolo cieco in O; (e) dopo il backtracking a G, continuando con l'arco (G,L), e raggiungendo un altro vicolo cieco in H; (f) risultato finale.}
@@ -110,7 +106,7 @@ of G containing v
 
 \clearpage
 \noindent
-Riportiamo due proprietà fondamentali dell'algoritmo DFS:
+Riportiamo alcune proprietà fondamentali dell'algoritmo DFS:
 \begin{enumerate}
     \item Sia $G$ un \textbf{grafo non orientato} su cui è stata eseguita una DFS a partire da un vertice $s$. Allora la visita DFS copre tutti i vertici della componente connessa di $s$, e gli archi di discovery formano uno spanning tree della componente connessa di $s$.
     \begin{itemize}

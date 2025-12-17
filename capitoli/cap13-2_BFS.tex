@@ -1,3 +1,157 @@
 \section{Breadth-First Search (BFS)}
 \label{sec:BFS}
 
+La \textbf{Breadth-First Search} (BFS) è una tecnica generale per l'attraversamento dei grafi che esplora "in ampiezza": parte da un nodo radice e visita tutti i suoi vicini prima di procedere ai nodi di livello successivo.
+
+L'algoritmo BFS applicato ad un grafo $G$ con $n$ vertici e $m$ archi visita tutti i vertici e archi del grafo in tempo $O(n + m)$.
+In particolare, la BFS può essere usata, come DFS, per verificare se $G$ è connesso, calcolare le \emph{connected components} di $G$ e calcolare uno \emph{spanning forest} di $G$. 
+
+Una differenza sostanziale tra BFS e DFS è che l'algoritmo BFS può essere utilizzato per calcolare i percorsi più brevi (in termini di numero di archi) tra due vertici, se questo esiste. Come abbiamo visto in precedenza, DFS è in grado di trovare un percorso tra due vertici, ma non garantisce che questo sia il più breve.
+
+\vspace{1\baselineskip}
+\noindent
+L'idea di base dell'algoritmo BFS è la seguente:
+\begin{itemize}
+    \item La visita procede per step e divide i vertici del grafico in livelli:
+    \begin{itemize}[nosep]
+        \item Comincia dal vertice sorgente $s$ che è l'unico vertice al livello 0, e marca $s$ come visitato.
+        \item Al passo $1$ si marcano come visitati tutti i vicini di $s$ e li si aggiunge al livello $1$.
+        \item Al passo $2$ si marcano come visitati tutti i vertici adiacenti ai vertici al livello 1 che non sono stati ancora visitati e li si aggiunge al livello $2$.
+        \item Al passo $i$ si marcano come visitati tutti i vertici adiacenti ai vertici al livello $i-1$ che non sono stati ancora visitati e li si aggiunge al livello $i$.
+        \item Il processo si ferma quando non ci sono più vertici non visitati adiacenti a vertici visitati.
+    \end{itemize}
+\end{itemize}
+
+\noindent
+Per implementare BFS abbiamo bisogno di etichettare i vertici e gli archi del grafo, come visto per DFS, ma con una differenza nei tipi di etichette utilizzate (Back edge DFS vs Cross edge BFS):
+
+\begin{itemize}
+    \item Ogni vertice può essere in uno dei seguenti stati:
+    \begin{itemize}[nosep]
+        \item \textbf{Unexplored}: il vertice non è stato ancora visitato.
+        \item \textbf{Visited}: il vertice è stato già visitato.
+    \end{itemize}
+    \item Ogni arco può essere in uno dei seguenti stati:
+    \begin{itemize}[nosep]
+        \item \textbf{Unexplored}: l'arco non è stato ancora esplorato.
+        \item \textbf{Discovery}: l'arco è stato esplorato per raggiungere un vertice non ancora visitato. Questo arco fa parte dello spanning tree.
+        \item \textbf{Cross edge}: l'arco è stato esplorato per raggiungere un vertice già visitato. Questo arco non fa parte dello spanning tree. 
+    \end{itemize}
+\end{itemize}
+
+\clearpage
+\hrule
+\begin{verbatim}
+Input: graph G
+Output: labeling of the edges and partition of the vertices of G
+1.  Algorithm BFS(G)
+2.      for all u in G.vertices()
+3.          setLabel(u, UNEXPLORED)
+4.      for all e in G.edges()
+5.          setLabel(e, UNEXPLORED)
+6.      for all v in G.vertices()
+7.          if getLabel(v) = UNEXPLORED
+8.              BFS(G, v)
+\end{verbatim}
+\hrule 
+\vspace{1\baselineskip}
+
+\hrule
+\begin{verbatim}
+Input: graph G and a source vertex s
+Output: labeling of the edges and vertices in the connected component 
+ of G containing s
+1.  Algorithm BFS(G, s)
+2.      L_0 = new empty sequence
+3.      L_0.addLast(s)
+4.      setLabel(s, VISITED)
+5.      i = 0
+6.      while not L_i.isEmpty()
+7.          L_{i+1} = new empty sequence
+8.          for all v in L_i.elements()
+9.              for all e in G.incidentEdges(v)
+10.                 if getLabel(e) = UNEXPLORED
+11.                     w = opposite(v,e)
+12.                     if getLabel(w) = UNEXPLORED
+13.                         setLabel(e, DISCOVERY)
+14.                         setLabel(w, VISITED)
+15.                         L_{i+1}.addLast(w)
+16.                     else
+17.                         setLabel(e, CROSS)
+18.         i = i + 1   // interno al while
+\end{verbatim}
+\hrule 
+\vspace{1\baselineskip}
+
+\clearpage
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/GraphsTraversal/BFS_ex.png}
+    \caption{Esempio di BFS su un grafo non orientato a partire dal vertice A. Supponiamo che le adiacenze di un vertice siano considerate in ordine alfabetico. I vertici visitati e gli archi esplorati sono evidenziati, con gli archi di scoperta (discovery) disegnati come linee solide e gli archi non appartenenti all'albero (cross edges) come linee tratteggiate; i vertici e gli archi non evidenziati sono tutti unexplored: (a) inizio della ricerca in A; (b) scoperta del livello 1; (c) scoperta del livello 2; (d) scoperta del livello 3; (e) scoperta del livello 4; (f) scoperta del livello 5.}
+    \label{fig:BFS_ex}
+\end{figure}
+
+\clearpage
+\noindent
+Riportiamo alcune proprietà fondamentali dell'algoritmo BFS. Sia $G$ un grafo (orientato o non orientato) su cui è stata eseguita una BFS a partire da un vertice $s$, BFS(G, s). Allora:
+\begin{enumerate}
+    \item La visita BFS(G, s) visita tutti gli archi e i vertici raggiungibili da $s$, ovvero tutti gli archi e i vertici della componente connessa di $s$, $G_s$.
+    \item Gli archi di discovery della visita BFS(G, s) formano uno spanning tree $T_s$ di $G_s$, chiamato \textbf{BFS tree} (albero BFS) radicato in $s$.
+    \item Per ogni vertice $v$ al livello $i$, il cammino nell'albero BFS $T_s$ tra $s$ e $v$ ha $i$ archi, e ogni altro cammino in $G$ da $s$ a $v$ ha almeno $i$ archi.
+    \item Se $(u,v)$ è un arco che non appartiene all'albero BFS, allora livello del vertice $v$ può essere al massimo $1$ maggiore del livello del vertice $u$.
+\end{enumerate}
+
+
+\subsection{Analisi e implementazione dell'algoritmo BFS}
+Nell'algoritmo di visita in ampiezza (Breadth First Search, BFS) ogni vertice del grafo viene etichettato esattamente due volte: inizialmente come \emph{UNEXPLORED}, e successivamente come \emph{VISITED}. Una proprietà fondamentale della procedura è che ogni vertice viene inserito in una e una sola sequenza di livello. Analogamente, ogni arco viene etichettato due volte: la prima volta come \emph{UNEXPLORED}, e la seconda volta come \emph{DISCOVERY} oppure \emph{CROSS}, a seconda della relazione tra i vertici collegati. Le operazioni di lettura e scrittura delle etichette associate a vertici e archi richiedono tempo costante $O(1)$. Inoltre, il metodo \texttt{incidentEdges(v)}, che restituisce tutti gli archi incidenti a un vertice $v$, viene invocato una sola volta per ciascun vertice del grafo. Se il grafo è rappresentato mediante \emph{Adjacency List} o \emph{Adjacency Map}, il tempo necessario per eseguire \texttt{incidentEdges(v)} è proporzionale al grado del vertice $v$, cioè $O(\deg(v))$. Sommando tale costo su tutti i vertici del grafo, si ottiene $\sum_{v} \deg(v) = 2m$, dove $m$ è il numero di archi del grafo. Ne consegue che il tempo totale impiegato dall'algoritmo BFS è $O(n + m)$, dove $n$ è il numero di vertici e $m$ il numero di archi.
+
+Per completezza, se invece il grafo è rappresentato mediante una \emph{edge list}, per determinare gli archi incidenti a un vertice è necessario scandire l'intera lista degli archi, operazione che richiede tempo $O(m)$ per ciascun vertice; poiché tale operazione viene eseguita per tutti i $n$ vertici, il tempo totale dell'algoritmo diventa $O(n \cdot m)$. Infine, nel caso di una rappresentazione tramite \emph{Adjacency Matrix}, il metodo \texttt{incidentEdges(v)} richiede la scansione dell'intera riga (o colonna) associata al vertice $v$, con costo $O(n)$; essendo tale operazione eseguita per ogni vertice, il tempo complessivo della BFS risulta $O(n^2)$, indipendentemente dal numero di archi presenti nel grafo.
+
+\clearpage
+\begin{lstlisting}[
+    language=Python,
+    caption={Implementazione Python dell'algoritmo BFS.},
+    captionpos=b,
+    label={lst:BFS},
+]
+    def BFS_complete(g):
+        """ Makes a BFS on the graph g and returns a dictionary where each vertex is mapped to the edge used to discover it (all the roots of the BFS trees are mapped to None)"""
+        forest = {}
+        for u in g.vertices():
+            if u not in forest:
+                forest[u] = None  # u is the root of the tree
+                BFS(g, u, forest)
+        return forest
+
+    
+    def BFS(g, s, discovered):
+        """ Makes a BFS traversal from the vertex s that has been already visited (discovered is a dictionary mapping each visited vertex with the edge used to discover it). When new vertices are discovered they are added to the dictionary."""
+        level = [s]  # level 0 includes only s
+        while len(level) > 0:
+            next_level = []  # list of the vertices in the next level
+            for u in level:  # for each vertex u in the level
+                for e in g.incident_edges(u):  # for each edge outgoing from u
+                    v = e.opposite(u)
+                    if v not in discovered:  # if v has not been visited yet
+                        discovered[v] = e  # add e to the dictionary
+                        next_level.append(v)  # add v to the next level
+            level = next_level
+
+\end{lstlisting}
+
+\subsection{Estensioni della BFS}
+Così come visto per DFS, attraverso l'utilizzo del \textit{Template Method Pattern}, è possibile specializzare l'algoritmo di BFS per risolvere una vasta gamma di problemi sui grafi mantenendo una complessità temporale efficiente di $O(n + m)$. 
+
+\begin{itemize}
+    \item Calcolo delle \textbf{componenti connesse} di un grafo;
+    \item Costruzione di una \textbf{spanning forest} del grafo;
+    \item Rilevamento di un \textbf{ciclo} nel grafo tra due vertici (se esistente);
+    \item Calcolo di un \textbf{percorso con il numero minimo di archi} tra due vertici (se esistente);
+    \begin{itemize}[nosep]
+        \item Non è possibile con DFS.
+    \end{itemize}
+\end{itemize}
+
+
+\clearpage
+\section{Transitive Closure}

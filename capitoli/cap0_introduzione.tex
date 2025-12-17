@@ -1,0 +1,229 @@
+\chapter{Introduzione}
+\label{cap:Introduzione}
+
+\section{Introduzione all'Approccio Orientato agli Oggetti}
+Lo sviluppo di software efficiente si basa sulla progettazione e analisi di algoritmi e strutture dati. L'approccio moderno privilegia la programmazione orientata agli oggetti (OOP) per promuovere la robustezza, la riusabilità e l'adattabilità del software.
+
+\subsection{Concetti Fondamentali}
+In questo contesto, i dati non sono entità isolate ma sono incapsulati insieme ai metodi necessari per accedervi e modificarli.
+\begin{itemize}
+    \item \textbf{Incapsulamento:} I dati sono protetti e accessibili solo tramite un'interfaccia pubblica.
+    \item \textbf{Information Hiding:} L'utente interagisce con l'interfaccia senza conoscere i dettagli implementativi interni.
+\end{itemize}
+
+\subsection{Design Patterns}
+Un \textit{Design Pattern} è una soluzione standard a un problema tipico di progettazione software. Fornisce un modello generale che può essere specializzato per adattarsi a problemi specifici. Un pattern è composto da:
+\begin{enumerate}
+    \item \textbf{Nome:} Identifica il pattern.
+    \item \textbf{Contesto:} Descrive quando può essere applicato.
+    \item \textbf{Template:} Descrive come viene applicato.
+    \item \textbf{Risultato:} Analizza ciò che il pattern produce.
+\end{enumerate}
+
+\noindent
+Esempi di pattern includono \textit{Iterator, Adapter, Factory} (Software Engineering) e \textit{Divide-and-Conquer, Greedy} (Algorithm Design).
+
+\section{Abstract Data Types (ADT) vs Strutture Dati}
+
+È fondamentale distinguere tra il modello astratto e la sua realizzazione concreta.
+
+\begin{itemize}
+    \item \textbf{Abstract Data Type (ADT):} È un modello matematico che descrive un tipo di dato attraverso i suoi comportamenti (semantica) e i parametri delle operazioni. Descrive \textit{cosa} fanno le operazioni, ma non \textit{come} (punto di vista dell'utente). È indipendente dall'implementazione.
+    \item \textbf{Struttura Dati:} È la realizzazione concreta di un ADT. Descrive la rappresentazione in memoria dei dati e l'implementazione degli algoritmi per le operazioni (punto di vista del progettista).
+\end{itemize}
+
+\section{ADT Stack (Pila)}
+
+Uno \textbf{Stack} è una collezione di oggetti inseriti e rimossi secondo il principio \textbf{LIFO} (Last-In, First-Out).
+
+\subsection{Operazioni Fondamentali}
+\begin{itemize}
+    \item \texttt{push(e)}: Inserisce l'elemento $e$ in cima alla pila.
+    \item \texttt{pop()}: Rimuove e restituisce l'elemento in cima. Se vuota, lancia un'eccezione.
+    \item \texttt{top()}: Restituisce (senza rimuovere) l'elemento in cima.
+    \item \texttt{is\_empty()}: Restituisce \texttt{True} se la pila è vuota.
+    \item \texttt{len()}: Restituisce il numero di elementi.
+\end{itemize}
+
+\subsection{Implementazione basata su Array}
+Una semplice implementazione in Python utilizza una lista dinamica (array dinamico). I dati vengono inseriti da sinistra a destra e una variabile mantiene l'indice dell'ultimo elemento aggiunto (\textit{top}).
+
+\subsubsection{Gestione della Memoria e Analisi Ammortizzata}
+Quando l'array è pieno, è necessario ridimensionarlo ("stretching").
+\begin{itemize}
+    \item Non si può semplicemente estendere la memoria contigua esistente.
+    \item Bisogna allocare un nuovo array più grande e copiare gli elementi.
+\end{itemize}
+
+\noindent
+Se si incrementasse la dimensione di una sola unità per ogni inserimento, il costo sarebbe quadratico nel tempo. La strategia efficiente è il \textbf{Raddoppiamento} della dimensione.
+
+\noindent
+\textbf{Analisi Ammortizzata:} Considera il costo totale di una sequenza di operazioni. Sebbene il raddoppiamento costi $O(n)$, esso avviene raramente. Ammortizzando questo costo sulle operazioni economiche ($O(1)$) di inserimento semplice:
+\begin{itemize}
+    \item \textbf{Costo reale:} 1 (array non pieno) o $O(n)$ (resize).
+    \item \textbf{Costo ammortizzato:} $O(1)$ per ogni operazione di \texttt{push}.
+\end{itemize}
+
+\subsection{Pattern Adapter}
+L'implementazione dello Stack può utilizzare il pattern \textit{Adapter} (o Wrapper). Si utilizza una classe esistente (es. \texttt{list} di Python) e si adatta la sua interfaccia a quella richiesta dall'ADT Stack.
+
+\begin{lstlisting}[language=Python, caption=Esempio di Classe ArrayStack]
+class ArrayStack:
+    def __init__(self):
+        self._data = [] # Lista privata
+        
+    def push(self, e):
+        self._data.append(e) # Adatta append a push
+        
+    def pop(self):
+        if self.is_empty():
+            raise Empty('Stack is empty')
+        return self._data.pop() # Adatta pop a pop
+\end{lstlisting}
+
+\section{Alberi (Trees)}
+Un albero è un modello astratto per rappresentare strutture gerarchiche non lineari. È composto da nodi con relazioni padre-figlio.
+
+\subsection{Terminologia}
+\begin{itemize}
+    \item \textbf{Radice (Root):} Nodo senza padre.
+    \item \textbf{Nodo Interno:} Nodo con almeno un figlio.
+    \item \textbf{Foglia (Leaf) / Nodo Esterno:} Nodo senza figli.
+    \item \textbf{Profondità (Depth) di un nodo:} Numero di antenati.
+    \item \textbf{Altezza (Height) dell'albero:} Massima profondità tra i nodi (o altezza della radice).
+\end{itemize}
+
+\subsection{ADT Tree}
+Un albero $T$ è un insieme di nodi e un insieme di relazioni padre-figlio che soddisfano le seguenti proprietà:
+\begin{itemize}
+    \item Se $T$ è non vuoto, esiste un nodo speciale chiamato \textbf{radice} che non ha padre.
+    \item Ogni nodo $v$ di $T$, diverso dalla radice, ha un unico nodo padre $w$; tutti i nodi che hanno $w$ come padre sono chiamati \textbf{figli} di $w$, e sono tra di loro \textbf{fratelli}. 
+\end{itemize}
+
+\noindent
+L'ADT Tree definisce metodi di accesso e navigazione generici:
+\begin{itemize}
+    \item \texttt{root()}: Restituisce la posizione della radice.
+    \item \texttt{parent(p)}: Restituisce il genitore della posizione $p$.
+    \item \texttt{children(p)}: Restituisce un iteratore sui figli di $p$.
+    \item \texttt{is\_leaf(p)}, \texttt{is\_root(p)}: Query booleane.
+\end{itemize}
+
+\subsection{Calcolo dell'Altezza e Profondità}
+Questi algoritmi sono spesso implementati ricorsivamente.
+\begin{equation}
+    \text{depth}(p) = 
+    \begin{cases} 
+    0 & \text{se } p \text{ è la radice} \\
+    1 + \text{depth}(\text{parent}(p)) & \text{altrimenti}
+    \end{cases}
+\end{equation}
+
+\begin{equation}
+    \text{height}(p) = 
+    \begin{cases} 
+    0 & \text{se } p \text{ è una foglia} \\
+    1 + \max(\{ \text{height}(c) \mid c \in \text{children}(p) \}) & \text{altrimenti}
+    \end{cases}
+\end{equation}
+
+\section{Alberi Binari (Binary Trees)}
+
+Un albero binario è un albero ordinato in cui ogni nodo ha \textbf{al massimo due figli}, distinti in \textit{figlio sinistro} e \textit{figlio destro}.
+
+\subsection{ADT BinaryTree}
+Estende l'ADT Tree con metodi specifici:
+\begin{itemize}
+    \item \texttt{left(p)}: Restituisce il figlio sinistro di $p$.
+    \item \texttt{right(p)}: Restituisce il figlio destro di $p$.
+    \item \texttt{sibling(p)}: Restituisce il fratello di $p$.
+\end{itemize}
+
+\subsection{Implementazione Collegata (Linked Structure)}
+A differenza degli array, gli alberi sono spesso implementati come strutture collegate per ottimizzare inserimenti e cancellazioni ($O(1)$ per aggiornamenti locali).
+Si utilizza una classe annidata \texttt{\_Node} che contiene:
+\begin{itemize}
+    \item \texttt{\_element}: Il dato memorizzato.
+    \item \texttt{\_parent}: Riferimento al nodo padre.
+    \item \texttt{\_left}: Riferimento al figlio sinistro.
+    \item \texttt{\_right}: Riferimento al figlio destro.
+\end{itemize}
+
+\noindent
+Inoltre, si utilizza il concetto di \textbf{ADT Position} per incapsulare il nodo. L'utente manipola oggetti di tipo \textit{Position}, non direttamente i nodi, proteggendo la struttura interna.
+
+\subsection{Il Pattern Position}
+
+Per implementare collezioni di elementi, come gli alberi, in modo robusto e astratto, si utilizza il pattern (o ADT) **Position**.
+
+\subsubsection{Concetto e Scopo}
+Una \texttt{Position} rappresenta un'astrazione di un "nodo" all'interno della struttura dati. A differenza di un semplice nodo, che potrebbe esporre direttamente i puntatori al padre e ai figli, una Position funge da "segnalibro" o "puntatore sicuro" all'elemento:
+\begin{itemize}
+    \item È un oggetto che incapsula un elemento.
+    \item Protegge la struttura interna: l'utente manipola le posizioni, ma solo la classe albero può accedere ai collegamenti (link) tra i nodi reali sottostanti.
+    \item Una Position $p$ rimane valida e non è influenzata dai cambiamenti negli altri nodi, a meno che non venga esplicitamente cancellata.
+\end{itemize}
+
+L'unica operazione pubblica principale dell'ADT Position è il metodo per accedere al dato contenuto:
+\begin{verbatim}
+p.element() # Restituisce l'elemento memorizzato in P
+\end{verbatim}
+
+\subsubsection{Implementazione in Python}
+Nel contesto dell'implementazione `LinkedBinaryTree`, la classe \texttt{Position} è definita come un wrapper pubblico intorno alla classe privata \texttt{\_Node}.
+Ogni istanza di \texttt{Position} memorizza:
+\begin{enumerate}
+    \item Un riferimento al nodo reale (\texttt{\_node}).
+    \item Un riferimento al contenitore a cui appartiene (\texttt{\_container}), utile per verificare che la posizione sia utilizzata con l'albero corretto.
+\end{enumerate}
+
+Ecco un esempio dell'implementazione come descritta nelle slide:
+
+\begin{lstlisting}[language=Python, caption=Classe Position (Wrapper)]
+class Position(BinaryTree.Position):
+    """Classe pubblica che avvolge un nodo."""
+    
+    def __init__(self, container, node):
+        """Costruttore interno, non invocato dall'utente."""
+        self._container = container
+        self._node = node
+        
+    def element(self):
+        """Restituisce l'elemento contenuto nella Position."""
+        return self._node._element
+        
+    def __eq__(self, other):
+        """Restituisce True se other si riferisce alla stessa Position."""
+        return type(other) is type(self) and other._node is self._node
+\end{lstlisting}
+
+\subsubsection{Meccanismo di Validazione}
+Per garantire la robustezza, l'albero implementa un metodo interno \texttt{\_validate(p)} che controlla se una data posizione è valida prima di usarla. Una posizione è considerata valida se:
+\begin{itemize}
+    \item È un'istanza della classe corretta.
+    \item Appartiene all'istanza dell'albero corrente (\texttt{p.\_container is self}).
+    \item Il nodo sottostante non è stato eliminato (spesso i nodi eliminati vengono marcati facendo puntare il loro padre a se stessi).
+\end{itemize}
+
+\subsection{Visite dell'Albero (Traversals)}
+Esistono diverse strategie per visitare sistematicamente i nodi:
+\begin{enumerate}
+    \item \textbf{Preorder (Anticipata):} Visita la radice, poi ricorsivamente i sottoalberi.
+    \item \textbf{Postorder (Posticipata):} Visita ricorsivamente i sottoalberi, poi la radice.
+    \item \textbf{Inorder (Simmetrica):} Specifica per alberi binari. Visita sottoalbero sinistro, poi radice, poi sottoalbero destro.
+    \item \textbf{Breadth-First (Visita in Ampiezza):} Visita i nodi livello per livello. Richiede l'uso di una \textbf{Coda} (Queue) per memorizzare i nodi da visitare.
+\end{enumerate}
+
+\clearpage
+\begin{lstlisting}[language=Python, caption=Algoritmo Breadth-First]
+def breadthfirst(self):
+    if not self.is_empty():
+        fringe = ArrayQueue()
+        fringe.enqueue(self.root())
+        while not fringe.is_empty():
+            p = fringe.dequeue()
+            yield p
+            for c in self.children(p):
+                fringe.enqueue(c)
+\end{lstlisting}

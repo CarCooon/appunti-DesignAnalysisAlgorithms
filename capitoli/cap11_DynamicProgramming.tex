@@ -120,16 +120,16 @@ Anche l'ordine in cui viene riempita la tabella è importante: in questo caso (e
 \vspace{1\baselineskip}
 \begin{lstlisting}
 def LCS(X, Y):
-""" Returns table such that L[j][k] is length of LCS for X[0:j] and Y[0:k] """
-n, m = len(X), len(Y)   
-L = [[0] * (m + 1) for k in range(n + 1)]   # (n+1) x (m+1) table
-for j in range(1, n + 1):           # j from 1 to n
-    for k in range(1, m + 1):       # k from 1 to m
-        if X[j-1] == Y[k-1]:        # match
-            L[j][k] = 1 + L[j-1][k-1]
-        else:                       # no match
-            L[j][k] = max(L[j-1][k], L[j][k-1])
-return L
+    """ Returns table such that L[j][k] is length of LCS for X[0:j] and Y[0:k] """
+    n, m = len(X), len(Y)   
+    L = [[0] * (m + 1) for k in range(n + 1)]   # (n+1) x (m+1) table
+    for j in range(1, n + 1):           # j from 1 to n
+        for k in range(1, m + 1):       # k from 1 to m
+            if X[j-1] == Y[k-1]:        # match
+                L[j][k] = 1 + L[j-1][k-1]
+            else:                       # no match
+                L[j][k] = max(L[j-1][k], L[j][k-1])
+    return L
 \end{lstlisting}
 \vspace{1\baselineskip}
 
@@ -153,19 +153,19 @@ Come già detto, la tabella $L$ contiene le lunghezze delle LCS per tutti i sott
 \vspace{1\baselineskip}
 \begin{lstlisting}
 def LCS_solution(X, Y, L):
-""" Returns the LCS of X and Y, given LCS table L """
-solution = []
-j, k = len(X), len(Y)
-while L[j][k] > 0:          # common characters remain
-    if X[j-1] == Y[k-1]:          # match
-        solution.append(X[j-1])   # add to solution
-        j -= 1
-        k -= 1
-    elif L[j-1][k] >= L[j][k-1]:  # no match
-        j -= 1
-    else:
-        k -= 1
-return ''.join(reversed(solution))  # return left-to-right LCS
+    """ Returns the LCS of X and Y, given LCS table L """
+    solution = []
+    j, k = len(X), len(Y)
+    while L[j][k] > 0:          # common characters remain
+        if X[j-1] == Y[k-1]:          # match
+            solution.append(X[j-1])   # add to solution
+            j -= 1
+            k -= 1
+        elif L[j-1][k] >= L[j][k-1]:  # no match
+            j -= 1
+        else:
+            k -= 1
+    return ''.join(reversed(solution))  # return left-to-right LCS
 \end{lstlisting}
 \vspace{1\baselineskip}
 

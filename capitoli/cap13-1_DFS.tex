@@ -128,23 +128,21 @@ Per completezza, se invece il grafo è rappresentato mediante una \emph{edge lis
     captionpos=b,
     label={lst:DFS},
 ]
-    def DFS_complete(g):
-        """Makes a DFS on the graph g and returns a dictionary where each vertex is mapped to the edge used to discover it (all the roots of the DFS trees are mapped to None)."""
-        forest = {}
-        for u in g.vertices():
-            if u not in forest:
-                forest[u] = None    # u is the root of the tree
-                DFS(g, u, forest)
-        return forest
-
-
-    def DFS(g, u, discovered):
-    """Makes a DFS traversal from the vertex u that has been already visited (discovered is a dictionary mapping each visited vertex with the edge used to discover it). When new vertices are discovered they are added to the dictionary."""
-    for e in g.incident_edges(u):   # for each edge outgoing from u
-        v = e.opposite(u)
-        if v not in discovered:     # if v is not visited
-            discovered[v] = e       # edge e is added to the dictionary
-            DFS(g, v, discovered)   # runs a DFS recursively from v
+def DFS_complete(g):
+    """Makes a DFS on the graph g and returns a dictionary where each vertex is mapped to the edge used to discover it (all the roots of the DFS trees are mapped to None)."""
+    forest = {}
+    for u in g.vertices():
+        if u not in forest:
+            forest[u] = None    # u is the root of the tree
+            DFS(g, u, forest)
+    return forest
+def DFS(g, u, discovered):
+"""Makes a DFS traversal from the vertex u that has been already visited (discovered is a dictionary mapping each visited vertex with the edge used to discover it). When new vertices are discovered they are added to the dictionary."""
+for e in g.incident_edges(u):   # for each edge outgoing from u
+    v = e.opposite(u)
+    if v not in discovered:     # if v is not visited
+        discovered[v] = e       # edge e is added to the dictionary
+        DFS(g, v, discovered)   # runs a DFS recursively from v
 \end{lstlisting}
 
 
@@ -239,20 +237,20 @@ Possiamo utilizzare DFS per trovare un cammino tra due vertici $v$ e $z$:
     captionpos=b,
     label={lst:DFS_Path},
 ]
-    def construct_path(u, v, discovered):
-        """Return a list of vertices forming a path from u to v (the list is empty if v is not reachable from u). Discovered is the dictionary returned by the DFS."""
-        path = []               # when we start the path is empty
-        if v in discovered:     # if v is in the connected component of u
-            # we build backward the path from v to u
-            path.append(v)
-            walk = v
-            while walk is not u:
-                e = discovered[walk]    # find the edge used to discover walk
-                parent = e.opposite(walk)
-                path.append(parent)     # add to the path the vertex opposite to walk
-                walk = parent
-            path.reverse()              # invert the path from u to v
-        return path
+def construct_path(u, v, discovered):
+    """Return a list of vertices forming a path from u to v (the list is empty if v is not reachable from u). Discovered is the dictionary returned by the DFS."""
+    path = []               # when we start the path is empty
+    if v in discovered:     # if v is in the connected component of u
+        # we build backward the path from v to u
+        path.append(v)
+        walk = v
+        while walk is not u:
+            e = discovered[walk]    # find the edge used to discover walk
+            parent = e.opposite(walk)
+            path.append(parent)     # add to the path the vertex opposite to walk
+            walk = parent
+        path.reverse()              # invert the path from u to v
+    return path
 \end{lstlisting}
 
 \clearpage

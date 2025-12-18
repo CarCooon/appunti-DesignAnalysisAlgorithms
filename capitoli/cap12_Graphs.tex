@@ -344,49 +344,38 @@ Per i metodi \texttt{degree} e \texttt{incident\_edges}, che accettano ciascuno 
     captionpos=b,
     label={lst:Vertex},
 ]
-    #------------------------- nested Vertex class -------------------------
-    class Vertex:
-        """Lightweight vertex structure for a graph."""
-        __slots__ = '_element'
-
-        def __init__(self, x):
-            """Do not call constructor directly. Use Graph's insert_vertex(x)."""
-            self._element = x
-
-        def element(self):
-            """Return element associated with this vertex."""
-            return self._element
-
-        def __hash__(self):    # will allow vertex to be a map/set key
-            return hash(id(self))
-
-
-
-    #------------------------- nested Edge class -------------------------
-    class Edge:
-        """Lightweight edge structure for a graph."""
-        __slots__ = '_origin', '_destination', '_element'
-
-        def __init__(self, u, v, x):
-            """Do not call constructor directly. Use Graph's insert_edge(u,v,x)."""
-            self._origin = u
-            self._destination = v
-            self._element = x
-
-        def endpoints(self):
-            """Return (u,v) tuple for vertices u and v."""
-            return (self._origin, self._destination)
-
-        def opposite(self, v):
-            """Return the vertex that is opposite v on this edge."""
-            return self._destination if v is self._origin else self._origin
-
-        def element(self):
-            """Return element associated with this edge."""
-            return self._element
-
-        def __hash__(self):    # will allow edge to be a map/set key
-            return hash((self._origin, self._destination))
+#------------------------- nested Vertex class -------------------------
+class Vertex:
+    """Lightweight vertex structure for a graph."""
+    __slots__ = '_element'
+    def __init__(self, x):
+        """Do not call constructor directly. Use Graph's insert_vertex(x)."""
+        self._element = x
+    def element(self):
+        """Return element associated with this vertex."""
+        return self._element
+    def __hash__(self):    # will allow vertex to be a map/set key
+        return hash(id(self))
+#------------------------- nested Edge class -------------------------
+class Edge:
+    """Lightweight edge structure for a graph."""
+    __slots__ = '_origin', '_destination', '_element'
+    def __init__(self, u, v, x):
+        """Do not call constructor directly. Use Graph's insert_edge(u,v,x)."""
+        self._origin = u
+        self._destination = v
+        self._element = x
+    def endpoints(self):
+        """Return (u,v) tuple for vertices u and v."""
+        return (self._origin, self._destination)
+    def opposite(self, v):
+        """Return the vertex that is opposite v on this edge."""
+        return self._destination if v is self._origin else self._origin
+    def element(self):
+        """Return element associated with this edge."""
+        return self._element
+    def __hash__(self):    # will allow edge to be a map/set key
+        return hash((self._origin, self._destination))
 \end{lstlisting}
 
 
@@ -481,35 +470,33 @@ class Graph:
     captionpos=b,
     label={lst:Graph_delete},
 ]
-    def remove_vertex(self, v):
-        """Remove vertex v and all its incident edges from the graph."""
-        # Phase 1: Remove references to v from the adjacency maps of its neighbors.
+def remove_vertex(self, v):
+    """Remove vertex v and all its incident edges from the graph."""
+    # Phase 1: Remove references to v from the adjacency maps of its neighbors.
+    
+    # For every neighbor w connected by an outgoing edge (v -> w),
+    # remove the link back to v from w's incoming map.
+    for w in list(self._outgoing[v]):
+        del self._incoming[w][v]
         
-        # For every neighbor w connected by an outgoing edge (v -> w),
-        # remove the link back to v from w's incoming map.
-        for w in list(self._outgoing[v]):
-            del self._incoming[w][v]
-            
-        # If the graph is directed, we also need to handle incoming edges (u -> v).
-        # We must remove the link to v from u's outgoing map.
-        # (In an undirected graph, _incoming is _outgoing, so the loop above covered this).
-        if self.is_directed():
-            for u in list(self._incoming[v]):
-                del self._outgoing[u][v]
-        
-        # Phase 2: Remove v from the graph's internal dictionaries.
-        del self._outgoing[v]
-        if self.is_directed():
-            del self._incoming[v]
-
-
-    def remove_edge(self, e):
-        """Remove edge e from the graph."""
-        u, v = e.endpoints()
-        
-        # Remove the edge from u's outgoing map
-        del self._outgoing[u][v]
-        
-        # Remove the edge from v's incoming map
-        del self._incoming[v][u]
+    # If the graph is directed, we also need to handle incoming edges (u -> v).
+    # We must remove the link to v from u's outgoing map.
+    # (In an undirected graph, _incoming is _outgoing, so the loop above covered this).
+    if self.is_directed():
+        for u in list(self._incoming[v]):
+            del self._outgoing[u][v]
+    
+    # Phase 2: Remove v from the graph's internal dictionaries.
+    del self._outgoing[v]
+    if self.is_directed():
+        del self._incoming[v]
+def remove_edge(self, e):
+    """Remove edge e from the graph."""
+    u, v = e.endpoints()
+    
+    # Remove the edge from u's outgoing map
+    del self._outgoing[u][v]
+    
+    # Remove the edge from v's incoming map
+    del self._incoming[v][u]
 \end{lstlisting}

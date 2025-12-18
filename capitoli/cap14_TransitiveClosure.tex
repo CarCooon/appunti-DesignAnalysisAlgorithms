@@ -1,3 +1,149 @@
 \chapter{Transitive Closure}
 \label{cap:TransitiveClosure}
 
+Come abbiamo visto, gli attraversamenti dei grafi possono essere utilizzati per rispondere a domande di base sulla raggiungibilità in un grafo orientato. In particolare, se siamo interessati a sapere se esiste un percorso dal vertice $u$ al vertice $v$ in un grafo, possiamo eseguire una \emph{DFS} o \emph{BFS} a partire da $u$ e osservare se $v$ viene scoperto. Se rappresentiamo un grafo con una \emph{Adjacency list} o \emph{Adjacency map}, possiamo rispondere alla domanda di raggiungibilità da $u$ a $v$ in tempo $O(n+m)$. 
+
+In alcune applicazioni, potremmo voler rispondere a molte query di raggiungibilità in modo più efficiente, e dunque potrebbe valere la pena precomputare una rappresentazione più conveniente di un grafo. Ad esempio, il primo passo per un servizio che calcola le indicazioni stradali da un'origine a una destinazione potrebbe essere quello di valutare se la destinazione è raggiungibile. Allo stesso modo, in una rete elettrica, potremmo voler essere in grado di determinare rapidamente se la corrente fluisce da un particolare vertice a un altro. Motivati da tali applicazioni, introduciamo la seguente definizione. 
+
+\paragraph{Definizione:} La \textbf{chiusura transitiva} (transitive closure) di un \emph{grafo orientato} $\vec{G}=(V,E)$ è a sua volta un \emph{grafo orientato} $\vec{G}^*=(V^*,E^*)$ tale che:
+\begin{itemize}[nosep]
+    \item $V^* = V$
+    \item $(u,v) \in E^{*}$ se e solo se $v$ è raggiungibile da $u$ in $\vec{G}$.
+\end{itemize}
+
+\noindent
+Dunque, la chiusura transitiva fornisce informazioni di raggiungibilità tra tutti i vertici in un grafo orientato, e in alcune applicazioni è più efficiente calcolare $\vec{G}^*$ piuttosto che eseguire un attraversamento (DFS o BFS) da ciascun vertice.
+
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.66\textwidth]{immagini/TransitiveClosure/ex_TransitiveClosure.png}
+    \caption{Esempio di grafo orientato (a sinistra) e la sua chiusura transitiva (a destra).}
+    \label{fig:ex_TransitiveClosure}
+\end{figure}
+
+
+
+\clearpage
+\noindent
+Se un grafo è rappresentato come una Adjacency List o Adjacency Map, possiamo calcolare la sua chiusura transitiva in tempo $O(n(n+m))$ facendo uso di $n$ attraversamenti del grafo, uno da ciascun vertice di partenza. Ad esempio, una DFS che inizia al vertice $u$ può essere utilizzata per determinare tutti i vertici raggiungibili da $u$, e quindi una collezione di archi che originano da $u$ nella chiusura transitiva.
+
+\section{Algoritmo di Floyd-Warshall per la Chiusura Transitiva}
+Un'alternativa efficace per calcolare la \emph{chiusura transitiva} di un grafo orientato sfrutta strutture che supportano la ricerca in tempo $O(1)$ per il metodo \texttt{get\_edge(u,v)}, come ad esempio una \emph{Adjacency Matrix}.
+
+Si tratta di un algoritmo di programmazione dinamica, l'algoritmo di \textbf{Floyd-Warshall}. L'idea alla base di questo algoritmo è quella di costruire una funzione booleana $G(i,j,k) = 1$ (vero) se esiste un percorso da $v_i$ a $v_j$ che utilizza solo i vertici tra $v_1, v_2, \ldots, v_k$ come vertici intermedi, $G(i,j,k) = 0$ (falso) altrimenti. 
+
+\begin{itemize}
+    \item La relazione di raggiungibilità soddisfa le seguenti condizioni:
+    \begin{itemize}[nosep]
+        \item $G(i,j,k) = 1$ \textbf{if} $G(i,j,k-1) = 1$;
+        \item $G(i,j,k) = 1$ \textbf{if}
+        $G(i,k,k-1) = 1$ \textbf{AND} $G(k,j,k-1) = 1$;
+        \item $G(i,j,k) = 0$ \textbf{otherwise}.
+    \end{itemize}
+
+    \item \textbf{Caso base} ($k = 0$):
+    \[
+        G(i,j,0) =
+        \begin{cases}
+            1 & \text{if } (v_i,v_j) \in E, \\
+            0 & \text{otherwise}.
+        \end{cases}
+    \]
+
+    \item \textbf{Equazione caratteristica} ($k \geq 1$):
+    \[
+        G(i,j,k) =
+        G(i,j,k-1)
+        \;\textbf{OR}\;
+        \big( G(i,k,k-1) \;\textbf{AND}\; G(k,j,k-1) \big).
+    \]
+\end{itemize}
+
+\noindent
+L'algoritmo di Floyd-Warshall, descritto tramite la funzione booleana $G(i,j,k)$, va interpretato come un procedimento incrementale che costruisce gradualmente tutti i cammini possibili nel grafo.
+
+Il caso base indica che, senza alcun vertice intermedio, un cammino tra $i$ e $j$ esiste solo se c'è un arco diretto, fornendo il punto di partenza per cammini più complessi.
+
+La regola ricorsiva mostra come, ad ogni passo, aggiungere un nuovo vertice $v_k$ come possibile intermedio: un cammino tra $i$ e $j$ esiste se esiste già senza usare $v_k$, oppure se si possono concatenare due cammini più piccoli, da $i$ a $v_k$ e da $v_k$ a $j$, che non utilizzano $v_k$ come intermedio. In altre parole, ogni nuovo vertice intermedio permette di combinare cammini già noti per crearne di nuovi, senza introdurre ambiguità o cicli.
+
+Considerando tutti i vertici come potenziali intermedi uno alla volta, alla fine $G(i,j,n)$ rappresenta tutti i cammini possibili tra ogni coppia di vertici, cioè la chiusura transitiva del grafo.
+
+
+\clearpage
+\noindent
+Per comprendere meglio l'algoritmo, è utile presentare anche una versione alternativa basata sull'approccio del grafo incrementale, che realizza la stessa logica della costruzione booleana ma opera direttamente sugli archi e mostra in maniera più intuitiva come i nuovi percorsi vengono aggiunti passo dopo passo.
+
+\vspace{1\baselineskip}
+\noindent
+Sia $\vec{G}$ un grafo orientato con $n$ vertici e $m$ archi. L'idea è quella di calcolare la chiusura transitiva di $\vec{G}$ in una serie di round successivi.
+
+\begin{enumerate}
+    \item Inizializziamo $\vec{G}_0 = \vec{G}$.
+    \item Numeriamo arbitrariamente i vertici di $\vec{G}$ come $v_1,v_2, \ldots, v_n$.
+    \item Per ogni round $k = 1, \dots, n$:
+    \begin{itemize}[nosep]
+        \item Un arco $(v_i,v_j)$ appartiene a $\vec{G}_k$ se e solo se: $(v_i,v_j)$ era già presente in $\vec{G}_{k-1}$ oppure $(v_i,v_k)$ e $(v_k,v_j)$ appartengono a $\vec{G}_{k-1}$.
+        \item Costruiamo $\vec{G}_k$ copiando $\vec{G}_{k-1}$ e aggiungendo tutti gli archi $(v_i,v_j)$ che soddisfano la condizione precedente.
+    \end{itemize}
+    \item Dopo aver completato il round $n$, otteniamo $\vec{G}_n = \vec{G}^*$; restituiamo $\vec{G}_n$ come chiusura transitiva di $\vec{G}$.
+\end{enumerate} 
+
+\noindent
+Questo approccio incrementale è facilmente implementabile seguendo lo pseudocodice riportato di seguito.
+
+\vspace{1\baselineskip}
+\hrule
+\begin{verbatim}
+Input: A directed graph G with n vertices
+Output: The transitive closure G^* of G
+1.  Algorithm FloydWarshall(G)
+2.       i = 1
+3.       for all v in G.vertices()       
+4.           denote v as v_i              
+5.           i = i + 1
+6.       G_0 = G                          
+7.       for k = 1 to n do                // k e' il vertice intermedio
+8.           G_k = G_{k-1}                // Copia stato precedente
+9.           for i = 1 to n (i != k) do   // Nodo sorgente
+10.             for j = 1 to n (j != i, k) do // Nodo destinazione
+11.                 if G_{k-1}.areAdjacent(v_i, v_k) AND 
+12.                    G_{k-1}.areAdjacent(v_k, v_j)     
+13.                    if NOT G_{k-1}.areAdjacent(v_i, v_j) 
+14.                        G_k.insertDirectedEdge(v_i, v_j, k) 
+15.      return G_n                       
+\end{verbatim}
+\hrule 
+\vspace{1\baselineskip}
+
+\clearpage
+\subsection{Analisi e implementazione dell'algoritmo}
+
+
+
+
+\begin{lstlisting}[
+    language=Python,
+    caption={Implementazione Python dell'algoritmo di Floyd-Warshall.},
+    captionpos=b,
+    label={lst:Floyd-Warshall},
+]
+def floyd_warshall(g):
+    """Return a new graph that is the transitive closure of g."""
+    closure = deepcopy(g)               # imported from copy module
+    verts = list(closure.vertices( ))   # make indexable list
+    n = len(verts)
+    for k in range(n):
+        for i in range(n):
+            # verify that edge (i,k) exists in the partial closure
+            if i != k and closure.get_edge(verts[i],verts[k]) is not None:
+                for j in range(n):
+                    # verify that edge (k,j) exists in the partial closure
+                    if i != j != k and closure.get_edge(verts[k],verts[j]) is not None:
+                        # if (i,j) not yet included, add it to the closure
+                        if closure.get_edge(verts[i],verts[j]) is None:
+                            closure.insert_edge(verts[i],verts[j])
+    return closure
+\end{lstlisting}
+
+

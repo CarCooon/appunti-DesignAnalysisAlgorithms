@@ -1,0 +1,83 @@
+\chapter{Directed Acyclic Graph - DAG}
+\label{cap:DAG}
+
+Con \textbf{Directed Acyclic Graph}, o \emph{DAG}, si indica un grafo orientato che non contiene cicli orientati, ovvero non esiste alcun percorso che inizi e finisca nello stesso vertice seguendo la direzione degli archi.
+In molte applicazioni capita di avere a che fare con questo tipo di grafi; alcune di queste applicazioni includono:
+\begin{itemize}[nosep]
+    \item Prerequisiti tra i corsi di un programma di laurea.
+    \item Ereditarietà tra le classi di un programma orientato agli oggetti.
+    \item Vincoli di scheduling tra le attività di un progetto.
+\end{itemize}
+
+\section{Topological Sorting}
+Sia $\vec{G}$ un grafo orientato con n vertici. Un \textbf{Topological Sorting}, o \emph{Topological Ordering} (ordinamento topologico), di $\vec{G}$ è un ordinamento dei vertici $v_1, \ldots, v_n$  di $\vec{G}$ tale che per ogni arco $(v_i,v_j)$ di $\vec{G}$ si ha che $i < j$. 
+
+Cioè, un ordinamento topologico è un ordinamento tale che qualsiasi percorso diretto in $\vec{G}$ attraversa i vertici in ordine crescente.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.95\textwidth]{immagini/TransitiveClosure/ex_TopologicalSorting.png}
+    \caption{Due Topological Sorting differenti dello stesso grafo orientato aciclico.}
+    \label{fig:ex_TopologicalSorting}
+\end{figure}
+
+\clearpage
+\noindent
+Si noti che un grafo orientato può avere più di un ordinamento topologico (come mostrato in Figura \ref{fig:ex_TopologicalSorting}), e che un ordinamento topologico esiste se e solo se il grafo orientato è aciclico.
+In relazione agli esempi precedenti, un ordinamento topologico di un grafo orientato può rappresentare un possibile ordine di completamento dei corsi in un piano di studi, o un possibile ordine di esecuzione delle attività di un progetto.
+
+
+\subsection{Implementazione Python}
+Dal momento che un grafo orientato $\vec{G}$ è aciclico, esiste almeno un vertice con \emph{in-degree} $0$ (cioè, senza archi entranti). Denotiamo tale vertice come $v_1$. 
+Rimuovendo $v_1$ da $\vec{G}$ insieme ai suoi archi uscenti, il grafo orientato risultante è ancora aciclico. Pertanto, il grafo orientato risultante ha anch'esso un vertice con in-degree $0$, che denotiamo come $v_2$. Ripetendo questo processo fino a quando il grafo orientato diventa vuoto, otteniamo un ordinamento $v_1, \ldots, v_n$ dei vertici di $\vec{G}$. 
+
+L'ordinamento così ottenuto rispetta la struttura del grafo per una ragione precisa: se esiste un arco $(v_i, v_j)$, allora $v_i$ agisce da 'ostacolo' per $v_j$. Finché $v_i$ rimane nel grafo, il vertice $v_j$ possiede almeno un arco entrante e, per la regola della nostra costruzione, non può essere selezionato. Pertanto, $v_i$ deve necessariamente essere rimosso per far sì che $v_j$ possa raggiungere un in-degree pari a zero e diventare eleggibile per la rimozione. Questo garantisce che nella sequenza finale $v_i$ compaia sempre prima di $v_j$ (ovvero $i < j$), soddisfacendo pienamente la definizione di ordinamento topologico. Pertanto, $v_1, \ldots, v_n$ è un ordinamento topologico.
+
+\vspace{2\baselineskip}
+\begin{lstlisting}[
+    language=Python,
+    caption={Implementazione Python dell'algoritmo di Topological Sorting.},
+    captionpos=b,
+    label={lst:TopologicalSorting},
+]
+def topological_sort(g):
+    """Return a list of vertices of directed acyclic graph g in topological order.
+    If graph g has a cycle, the result will be incomplete.
+    """
+    topo = [ ]      # a list of vertices placed in topological order
+    ready = [ ]     # list of vertices that have no remaining constraints
+    incount = { }   # keep track of in-degree for each vertex
+    for u in g.vertices( ):
+        incount[u] = g.degree(u, False) # parameter requests incoming degree
+        if incount[u] == 0:             # if u has no incoming edges,
+            ready.append(u)             # it is free of constraints
+    while len(ready) > 0:
+        u = ready.pop( )                # u is free of constraints
+        topo.append(u)                  # add u to the topological order
+        for e in g.incident_edges(u):   # consider all outgoing neighbors of u
+            v = e.opposite(u)
+            incount[v] -= 1     # v has one less constraint without u
+            if incount[v] == 0:
+                ready.append(v)
+    return topo
+\end{lstlisting}
+
+\clearpage
+\subsection{Analisi della complessità}
+Il ciclo iniziale che registra tutte le informazioni relative agli in-degrees degli $n$ vertici all'interno di \texttt{incount} utilizza tempo $O(n)$ basato sul metodo \texttt{degree}. Diciamo che un vertice $u$ viene visitato dall'algoritmo di topological sorting quando $u$ viene rimosso dalla lista \texttt{ready}. Un vertice $u$ può essere visitato solo quando \texttt{incount(u)} è 0, il che implica che tutti i suoi predecessori (vertici con archi uscenti verso $u$) sono stati precedentemente visitati. Di conseguenza, qualsiasi vertice che si trova su un ciclo diretto non verrà mai visitato, e qualsiasi altro vertice verrà visitato esattamente una volta. L'algoritmo attraversa tutti gli archi uscenti di ogni vertice visitato una volta, quindi il suo tempo di esecuzione è proporzionale al numero di archi uscenti dei vertici visitati. Cocnludiamo che il tempo di esecuzione è $O(n+m)$. Per quanto riguarda l'uso dello spazio, osserviamo che i contenitori \texttt{topo}, \texttt{ready} e \texttt{incount} hanno al massimo una voce per vertice, e quindi utilizzano spazio $O(n)$.
+
+\vspace{1\baselineskip}
+\noindent
+In sintesi:
+\begin{itemize}
+    \item Sia $\vec{G}$ un grafo orientato con $n$ vertici e $m$ archi, rappresentato tramite una \emph{Adjacency List}. L'algoritmo di topological sorting viene eseguito in tempo $O(n+m)$ utilizzando spazio ausiliario $O(n)$. Il risultato finale o produce un ordinamento topologico di $\vec{G}$ oppure non include alcuni vertici, il che indica che $\vec{G}$ contiene un ciclo orientato.
+\end{itemize}
+
+
+\clearpage
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/TransitiveClosure/ex_TopologicalSorting1.png}
+    \caption{Esempio di esecuzione dell'algoritmo di topological sort. L'etichetta vicino a un vertice mostra il suo valore corrente di incount e la sua eventuale posizione nell'ordinamento topologico risultante. Il vertice evidenziato è uno con incount pari a zero che diventerà il prossimo vertice nell'ordinamento topologico. Le linee tratteggiate denotano archi che sono già stati esaminati e che non sono più conteggiati nei valori di incount.}
+    \label{fig:ex_TopologicalSorting1}
+\end{figure}

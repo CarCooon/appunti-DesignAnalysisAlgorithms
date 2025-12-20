@@ -54,5 +54,29 @@ Si noti come dalla soluzione del problema single source shortest path sia possib
 
 \clearpage
 \section{Algoritmo di Dijkstra}
+Si vuole sviluppare un \textbf{algoritmo Greedy} per la risoluzione del problema \emph{single source shortest path}. L'idea principale nell'applicare il \emph{metodo Greedy} al problema degli shortest path da una singola sorgente è quella di eseguire una "ricerca in ampiezza pesata" a partire dal vertice sorgente $s$. In particolare, possiamo utilizzare il \emph{metodo Greedy} per sviluppare un algoritmo che cresce iterativamente una "nuvola" di vertici a partire da $s$, con i vertici che entrano nella nuvola in ordine di distanza da $s$. Quindi, in ogni iterazione, il prossimo vertice scelto è il vertice al di fuori della nuvola che è più vicino a $s$. L'algoritmo termina quando non ci sono più vertici al di fuori della nuvola (o quando quelli al di fuori della nuvola non sono connessi a quelli all'interno della nuvola, e quindi hanno distanza infinita), a quel punto abbiamo uno shortest path da $s$ a ogni vertice di $G$ raggiungibile da $s$. Questo approccio è un esempio semplice, ma comunque potente, del \emph{metodo Greedy}. 
+
+L'applicazione del \emph{metodo Greedy} al problema degli shortest path da una singola sorgente porta a un algoritmo noto come \textbf{algoritmo di Dijkstra}.
+
+
+\subsection*{Edge Relaxation - Greedy Choice}
+Definiamo un'etichetta $D(v)$ per ogni vertice $v$ in $V$, che utilizziamo per approssimare la distanza da $s$ a $v$ in $G$. Il significato di queste etichette è che $D(v)$ memorizzerà sempre la lunghezza del miglior percorso che abbiamo trovato finora da $s$ a $v$. Difatti, possiamo pensare a $D(v)$ come un lmite superiore della distanza minima reale $d(s,v)$. Inoltre, definiamo un insieme $C$, che rappresenta l'insieme di vertici nella "nuvola", ovvero quei vertici per i quali abbiamo già calcolato la distanza minima da $s$.
+
+Inizialmente, definiamo $D(s) = 0$ e $D(v) = \infty$ per ogni $v \neq s$, e l'insieme $C$ come l'insieme vuoto. Ad ogni iterazione dell'algoritmo, selezioniamo un vertice $u$ non in $C$ con l'etichetta $D(u)$ più piccola, e lo aggiungiamo a $C$ (Generalmente, utilizzeremo una coda di priorità per selezionare tra i vertici al di fuori della nuvola, per via dell'efficienza del metodo \texttt{remove\_min()}). 
+
+Nella prima iterazione, ovviamente, aggiungeremo $s$ a $C$. Una volta che un nuovo vertice $u$ viene aggiunto a $C$, aggiorniamo l'etichetta $D(v)$ di ogni vertice $v$ adiacente a $u$ e che è al di fuori di $C$, per riflettere il fatto che potrebbe esserci un nuovo e migliore modo per raggiungere $v$ passando per $u$. Questa operazione di aggiornamento è nota come \emph{rilassamento degli archi} (\textbf{edge relaxation}), poiché prende una vecchia stima e verifica se può essere migliorata per avvicinarsi al suo valore reale. L'operazione specifica di rilassamento degli archi è la seguente:
+
+\vspace{1\baselineskip}
+$\quad \quad \quad \textbf{Edge Relaxation:}$
+$$
+\begin{aligned}
+&\textbf{if } D(u) + w(u,v) < D(v) \textbf{ then} \\
+&\quad D(v) = D(u) + w(u,v)
+\end{aligned}
+$$
+
+\clearpage
+
+
 
 

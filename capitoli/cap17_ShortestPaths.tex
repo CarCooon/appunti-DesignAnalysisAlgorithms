@@ -59,7 +59,7 @@ Si vuole sviluppare un \textbf{algoritmo Greedy} per la risoluzione del problema
 L'applicazione del \emph{metodo Greedy} al problema degli shortest path da una singola sorgente porta a un algoritmo noto come \textbf{algoritmo di Dijkstra}.
 
 
-\subsection*{Edge Relaxation - Greedy Choice}
+\subsection{Edge Relaxation - Greedy Choice}
 Definiamo un'etichetta $D(v)$ per ogni vertice $v$ in $V$, che utilizziamo per approssimare la distanza da $s$ a $v$ in $G$. Il significato di queste etichette è che $D(v)$ memorizzerà sempre la lunghezza del miglior percorso che abbiamo trovato finora da $s$ a $v$. Difatti, possiamo pensare a $D(v)$ come un lmite superiore della distanza minima reale $d(s,v)$. Inoltre, definiamo un insieme $C$, che rappresenta l'insieme di vertici nella "nuvola", ovvero quei vertici per i quali abbiamo già calcolato la distanza minima da $s$.
 
 Inizialmente, definiamo $D(s) = 0$ e $D(v) = \infty$ per ogni $v \neq s$, e l'insieme $C$ come l'insieme vuoto. Ad ogni iterazione dell'algoritmo, selezioniamo un vertice $u$ non in $C$ con l'etichetta $D(u)$ più piccola, e lo aggiungiamo a $C$ (Generalmente, utilizzeremo una coda di priorità per selezionare tra i vertici al di fuori della nuvola, per via dell'efficienza del metodo \texttt{remove\_min()}). 
@@ -76,7 +76,7 @@ $$
 $$
 
 \clearpage
-\subsection*{Pseudocodice ed Esempio}
+\subsection{Pseudocodice ed Esempio}
 L'algoritmo di Dijkstra è descritto nel seguente pseudocodice:
 \vspace{1\baselineskip}
 \hrule
@@ -118,6 +118,85 @@ Output: The length of a shortest path from s to v for each
     \label{fig:ex_dijkstra2}
 \end{figure}
 
+\clearpage
+
+\subsection{Dimostrazione della correttezza dell'algoritmo}
+Potrebbe non essere immediatamente chiaro il motivo per cui l'algoritmo di Dijkstra trovi correttamente lo shortest path dal vertice di partenza $s$ a ogni altro vertice $u$ nel grafo. Perché la distanza minima da $s$ a $u$ è uguale al valore dell'etichetta $D(u)$ al momento in cui il vertice $u$ viene rimosso dalla coda di priorità $Q$ e aggiunto alla nuvola $C$? La risposta a questa domanda dipende dal fatto che \textbf{non ci siano archi con peso negativo nel grafo}, poiché ciò consente al metodo Greedy di funzionare correttamente.
+
+\paragraph{Teorema:} Nell'algoritmo di Dijkstra, ogni volta che un vertice $v$ viene inserito nella soluzione $C$, l'etichetta $D(v)$ è uguale a $d(s, v)$, la lunghezza del percorso minimo da $s$ a $v$.
+
+\paragraph{Dimostrazione:} Per dimostrare la tesi, procediamo per assurdo. Ipotizziamo che l'algoritmo sbagli per qualche vertice. Sia $z$ il \textbf{primo vertice} che l'algoritmo inserisce in $C$ tale che la sua etichetta sia errata, ovvero:
+$$ D(z) > d(s, z) $$
+Poiché $z$ è il \textit{primo} errore, significa che per tutti i vertici inseriti in $C$ prima di $z$, l'algoritmo ha calcolato la distanza corretta.
+
+Esiste sicuramente un percorso minimo reale da $s$ a $z$ (altrimenti la distanza sarebbe $\infty$). Chiamiamo questo percorso $P$.
+Consideriamo il momento esatto in cui l'algoritmo sta per inserire $z$ in $C$. Analizziamo il percorso $P$ partendo da $s$:
+\begin{itemize}
+    \item Il vertice sorgente $s$ appartiene già a $C$.
+    \item Il vertice $z$ non appartiene a $C$.
+    \item Di conseguenza, percorrendo il cammino $P$ da $s$ a $z$, deve necessariamente esistere un primo arco $(x, y)$ che attraversa il confine di $C$, tale che $x \in C$ (il vertice "dentro") e $y \notin C$ (il primo vertice "fuori").
+\end{itemize}
+Dunque, sia $y$ il \textbf{primo vertice} di $P$ che non appartiene a $C$, e sia $x$ il predecessore di $y$ lungo il percorso $P$. 
+\begin{itemize}
+    \item Poiché $y$ è il primo vertice fuori da $C$, ne consegue che $x$ deve trovarsi dentro $C$ (al limite $x$ potrebbe coincidere con $s$).
+\end{itemize}
+
+
+\clearpage
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/ShortestPath/dimostrazione.png}
+    \caption{Rappresentazione grafica della dimostrazione della correttezza dell'algoritmo di Dijkstra.}
+    \label{fig:dijkstra_proof}
+\end{figure}
+
+\noindent
+Poiché $z$ è stato definito come il \textit{primo} vertice "sbagliato" aggiunto a $C$, e $x$ è stato aggiunto a $C$ prima di $z$, allora l'etichetta di $x$ è sicuramente corretta:
+$$ D(x) = d(s, x) $$
+
+\noindent
+Quando $x$ è stato inserito in $C$, l'algoritmo ha eseguito la procedura di \textit{Edge Relaxation} sui suoi vertici adiacenti, incluso $y$. Questo aggiornamento garantisce che:
+$$ D(y) \le D(x) + w(x, y) = d(s, x) + w(x, y) $$
+
+\noindent
+Poiché $x$ e $y$ sono vertici consecutivi sul percorso minimo $P$ (che è un percorso minimo globale), anche il sotto-percorso da $s$ a $y$ deve essere un percorso minimo. Pertanto:
+$$ d(s, y) = d(s, x) + w(x, y) $$
+
+\noindent
+Combinando le due equazioni precedenti, otteniamo che l'etichetta di $y$ è già corretta al momento dell'estrazione di $z$:
+$$ D(y) = d(s, y) $$
+
+\noindent
+Ora arriviamo al cuore della dimostrazione logica.
+L'algoritmo di Dijkstra è \textit{greedy}: seleziona sempre il vertice fuori da $C$ con l'etichetta $D$ più piccola. In questo momento, sia $z$ che $y$ sono fuori da $C$ (sono nella coda $Q$), ma l'algoritmo ha scelto di estrarre $z$. Questo implica necessariamente che:
+$$ D(z) \le D(y) $$
+
+\noindent
+Qui entra in gioco l'ipotesi fondamentale che non esistano archi con peso negativo. La distanza reale da $s$ a $z$ può essere scomposta nella distanza da $s$ a $y$ più la distanza rimanente da $y$ a $z$:
+$$ d(s, z) = d(s, y) + d(y, z) $$
+
+\noindent
+Poiché i pesi sono non negativi, allora si ha che $d(y, z) \ge 0$. Di conseguenza:
+$$ d(s, y) \le d(s, z) $$
+
+\noindent
+Mettiamo insieme la catena di disuguaglianze:
+\begin{alignat*}{4}
+    D(z)    &\le{}& D(y)    &\quad& \text{(} &\text{per la scelta greedy dell'algoritmo)} \\
+    D(y)    &={} & d(s,y)  &\quad& \text{(} &\text{perché l'etichetta di $y$ è già corretta al momento dell'estrazione di $z$)} \\
+    d(s,y)  &\le{}& d(s,z) &\quad& \text{(} &\text{perché i pesi sono non-negativi)}
+\end{alignat*}
+
+\noindent
+Unendo tutto:
+$$ D(z) \le d(s, z) $$
+
+\noindent
+Ma questo contraddice la nostra ipotesi iniziale per assurdo, secondo cui $D(z) > d(s, z)$.
+
+\vspace{1\baselineskip}
+\noindent
+La contraddizione dimostra che non può esistere un "primo vertice sbagliato" $z$. Pertanto, per ogni vertice $v$ aggiunto a $C$, l'etichetta $D(v)$ rappresenta sempre la distanza minima corretta.
 
 
 

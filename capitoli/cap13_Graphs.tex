@@ -62,7 +62,6 @@ Un \textbf{cammino} (o percorso, path) in un grafo è una sequenza di vertici co
 È anche possibile vedere un cammino come una sequenza di archi $(e_1, e_2, \ldots, e_{k-1})$ tale che l'estremo di destinazione di $e_i$ è l'estremo sorgente di $e_{i+1}$, per $i = 1, 2, \ldots, k-1$.
 Un \textbf{cammino semplice} non visita uno stesso vertice più di una volta. 
 
-
 Un \textbf{cammino orientato} in un grafo orientato è una sequenza di vertici $(v_1, v_2, \ldots, v_k)$ tale che ogni arco $(v_i, v_{i+1})$ è un arco orientato del grafo, per $i = 1, 2, \ldots, k-1$.
 
 \begin{figure}[!ht]
@@ -86,7 +85,7 @@ Un \textbf{cammino orientato} in un grafo orientato è una sequenza di vertici $
 
 
 \noindent
-Un \textbf{ciclo} in un grafo è un cammino che inizia e termina nello stesso vertice, con almeno un arco. Un \textbf{ciclo semplice} non visita uno stesso vertice più di una volta, ad eccezione del vertice iniziale/finale. Un \textbf{auto-ciclo} è un ciclo che consiste in un singolo arco che collega un vertice a se stesso.
+Un \textbf{ciclo} in un grafo è un cammino che inizia e termina nello stesso vertice, con almeno un arco. Un \textbf{ciclo semplice} non visita uno stesso vertice più di una volta, ad eccezione del vertice iniziale/finale. Un \textbf{auto-ciclo} è un ciclo che consiste in un singolo arco che collega un vertice a se stesso. Un \textbf{grafo semplice} è un grafo che non contiene \emph{auto-cicli} e non presenta più archi tra la stessa coppia di vertici (archi paralleli).
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=0.4\textwidth]{immagini/Graphs/term_loops.png}
@@ -103,7 +102,7 @@ Siano $n$ il numero di vertici e $m$ il numero di archi di un grafo non orientat
     \begin{itemize}
         \item Questo perché ogni arco contribuisce a incrementare il grado di due vertici.
     \end{itemize}
-    \item In un grafo non orientato senza archi paralleli e auto-cicli, il numero massimo di archi è dato da $m \le \frac{n(n-1)}{2}$. 
+    \item In un grafo non orientato senza archi paralleli e auto-cicli (ovvero un \emph{grafo semplice}), il numero massimo di archi è dato da $m \le \frac{n(n-1)}{2}$. 
     \begin{itemize}
         \item Per via delle ipotesi di cui sopra, ciascun nodo può avere grado massimo $(\le) n-1$. Riprendendo la proprietà precedente, si ha quindi che $2m \le n(n-1)$.
     \end{itemize}

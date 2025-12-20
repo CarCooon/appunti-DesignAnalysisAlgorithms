@@ -70,13 +70,58 @@ Nella prima iterazione, ovviamente, aggiungeremo $s$ a $C$. Una volta che un nuo
 $\quad \quad \quad \textbf{Edge Relaxation:}$
 $$
 \begin{aligned}
-&\textbf{if } D(u) + w(u,v) < D(v) \textbf{ then} \\
-&\quad D(v) = D(u) + w(u,v)
+    &\textbf{if } D(u) + w(u,v) < D(v) \textbf{ then} \\
+    &\quad D(v) = D(u) + w(u,v)
 \end{aligned}
 $$
 
 \clearpage
+\subsection*{Pseudocodice ed Esempio}
+L'algoritmo di Dijkstra è descritto nel seguente pseudocodice:
+\vspace{1\baselineskip}
+\hrule
+\begin{verbatim}
+Input: A weighted graph G with nonnegative edge weights, 
+       and a source vertex s of G.
+Output: The length of a shortest path from s to v for each 
+        vertex v of G.
+1.  Algorithm ShortestPath(G, s):   
+2.      Initialize D[s] = 0 and D[v] = +infinity for each vertex v != s
+3.      Let a priority queue Q contain all the vertices of G 
+            using the D labels as keys.
+4.      while Q is not empty do
+5.          // pull a new vertex u into the cloud
+6.          u = value returned by Q.remove_min()
+7.          for each vertex v adjacent to u such that v is in Q do
+8.              // perform the relaxation procedure on edge (u,v)
+9.              if D[u] + w(u,v) < D[v] then
+10.                 D[v] = D[u] + w(u,v)
+11.                 Change to D[v] the key of vertex v in Q.
+12.     return the label D[v] of each vertex v                  
+\end{verbatim}
+\hrule 
+\vspace{1\baselineskip}
 
 
+\vspace{2\baselineskip}
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1\textwidth]{immagini/ShortestPath/ex_dijkstra1.png}
+    \label{fig:ex_dijkstra1}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{immagini/ShortestPath/ex_dijkstra2.png}
+    \label{fig:ex_dijkstra2}
+\end{figure}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{immagini/ShortestPath/ex_dijkstra3.png}
+    \label{fig:ex_dijkstra3}
+\end{figure}
 
 

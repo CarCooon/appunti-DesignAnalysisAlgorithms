@@ -201,5 +201,70 @@ La contraddizione dimostra che non può esistere un "primo vertice sbagliato" $z
 
 
 \subsection{Analisi della complessità}
+Indichiamo con $n$ e $m$ rispettivamente il numero di vertici e di archi del grafo di input $G$. Assumiamo che i pesi degli archi possano essere sommati e confrontati in tempo costante. 
+
+Per analizzare il tempo di esecuzione dell'algoritmo di Dijkstra dobbiamo innanzitutto specificare come viene rappresentato il grafo $G$ e come viene implementata la coda di priorità $Q$. Assumiamo di rappresentare il grafo $G$ tramite \emph{Adjacency List} o \emph{Adjacency Map}. In questo modo possiamo attraversare i vertici adiacenti a $u$ durante la fase di rilassamento in tempo proporzionale al loro numero. Pertanto, il tempo speso nella gestione del ciclo annidato \texttt{for}, e il numero di iterazioni di quel ciclo, è dato da:
+
+$$
+\sum_{u \text{ in } V} outdeg(u)
+$$
+
+\noindent
+che è $O(m)$. Il ciclo esterno \texttt{while} viene eseguito $O(n)$ volte, poiché in ogni iterazione viene aggiunto un nuovo vertice alla nuvola. 
+
+Tuttavia, per completare l'analisi dell'algoritmo, dobbiamo considerare anche l'implementazione della coda di priorità $Q$. La coda a priorità ad ogni iterazione dell'algoritmo contiene gli elementi che non sono ancora presenti nella soluzione $C$, per cui inizialmente vengono effettuate $n$ operazioni di inserimento in $Q$ (soluzione ancora vuota); queste sono le uniche operazioni di inserimento, quindi la dimensione massima della coda è $n$. In ciascuna delle $n$ iterazioni del ciclo \texttt{while}, viene effettuata una chiamata a \texttt{remove\_min()} per estrarre il vertice $u$ con l'etichetta $D$ più piccola da $Q$. Successivamente, per ogni vicino $v$ di $u$, viene eseguito un rilassamento dell'arco, che potrebbe comportare un aggiornamento della chiave di $v$ nella coda \footnote
+{
+    All'interno della coda a priorità $Q$, ciascun elemento ha per chiave il valore dell'etichetta $D(v)$ del vertice corrispondente $v$, e il valore associato è il vertice $v$ stesso. 
+}. Pertanto, è necessario implementare una \emph{Adaptable Priority Queue}, in cui la chiave di un vertice $v$ può essere modificata utilizzando il metodo \texttt{update(l,k)}, dove $l$ è il \emph{locator} per l'elemento della coda associato al vertice $v$. Nel peggiore dei casi, potrebbe esserci un aggiornamento per ogni arco del grafo. Complessivamente, il tempo di esecuzione dell'algoritmo di Dijkstra è limitato dalla somma delle seguenti operazioni:
+\begin{itemize}[nosep]
+    \item $n$ operazioni di inserimento in $Q$.
+    \item $n$ chiamate al metodo \texttt{remove\_min()} su $Q$.
+    \item $m$ chiamate al metodo \texttt{update()} su $Q$.
+\end{itemize}
+
+\noindent
+Se $Q$ è una Adaptable Priority Queue implementata come heap, allora ciascuna delle operazioni sopra descritte viene eseguita in tempo $O(\log n)$, e quindi il tempo complessivo per l'algoritmo di Dijkstra è $O((n + m) \log n)$. Si noti che se si desidera esprimere il tempo di esecuzione come funzione di $n$ soltanto, allora nel caso peggiore è $O(n^2 \log n)$.
+
+\vspace{1\baselineskip}
+\noindent
+È possibile implementare la coda a priorità $Q$ utilizzando un'\emph{array non ordinato}. In questo caso, l'operazione di estrazione del minimo richiede $O(n)$ tempo, mentre l'aggiornamento delle chiavi può essere eseguito in tempo costante. Pertanto, il tempo totale di esecuzione dell'algoritmo di Dijkstra diventa $O(n^2 + m)$, che si semplifica a $O(n^2)$ per grafi semplici.
+
+\subsubsection{Confronto tra le due implementazioni - Adaptable Priority Queue vs Array non ordinato}
+Come abbiamo visto, abbiamo due possibili scelte per implementare la coda a priorità $Q$ nell'algoritmo di Dijkstra: una implementazione basata su heap, che porta a un tempo di esecuzione di $O((n + m) \log n)$, e una implementazione basata su array non ordinato, che porta a un tempo di esecuzione di $O(n^2)$. Dal momento che entrambe le implementazioni hanno lo stesso livello di complessità (a livello di codice), la scelta tra le due dipende principalmente dalla densità del grafo di input.
+
+In generale, si preferisce l'implementazione basata su heap quando il grafo è sparso (ovvero, quando il numero di archi è abbastanza piccolo, e si ha $m < n^2 / \log n$). Si preferisce invece l'implementazione basata su array non ordinato quando il grafo è denso (ovvero, quando il numero di archi è vicino al massimo possibile, e si ha $m > n^2 / \log n$).
+
+
+\begin{table}[h]
+    \centering
+    \renewcommand{\arraystretch}{1.2} 
+    
+    % Definizione colonne:
+    % | l | -> Prima colonna: larghezza minima necessaria (adatta al contenuto)
+    % X |   -> Seconda colonna: riempie lo spazio disponibile
+    % X |   -> Terza colonna: riempie lo spazio disponibile
+    \begin{tabularx}{\textwidth}{| l | X | X |}
+        \hline
+        % Prima riga: applico il grassetto manualmente qui
+        \textbf{Implementation of the Priority Queue} & \textbf{Complexity} & \textbf{Usable for} \\
+        \hline
+        
+        Binary Heap     & $O(m \log n)$     & $m < n^2 / \log n$ \\
+        \hline
+        
+        Unordered Array & $O(n^2)$          & $m > n^2 / \log n$ \\
+        \hline
+        
+        Fibonacci Heap  & $O(m + n \log n)$ & always \\
+        \hline
+    \end{tabularx}
+    \caption{Si noti che esiste un'implementazione avanzata della coda a priorità, nota come \textbf{Fibonacci heap}, che può essere utilizzata per implementare l'algoritmo di Dijkstra in tempo $O(m + n \log n)$. Si tratta di un'implementazione più complessa, ma che offre prestazioni migliori in tutti i casi, utile in applicazioni specifiche che richiedono un'elevata efficienza.}
+    \label{tab:dijkstra_implementations_comparison}
+\end{table}
+
+\clearpage
+
+
+
 
 

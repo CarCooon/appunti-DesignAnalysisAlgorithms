@@ -262,3 +262,54 @@ def breadthfirst(self):
             for c in self.children(p):
                 fringe.enqueue(c)
 \end{lstlisting}
+
+\clearpage
+\section{ADT Map}
+Una mappa è una struttura dati usata per implementare l'astrazione del dizionario: permette di cercare, inserire e aggiornare informazioni a partire da una chiave.
+Si parla di \textbf{contenitore associativo} perché la mappa associa una variabile di tipo ordinabile, detta key, alle posizioni che individuano un dato, detto value. In altre parole, a ogni chiave è associato un valore memorizzato nella struttura.
+Una mappa può essere vista come una collezione di elementi a coppia, chiamati \textbf{item}, ciascuno della forma ⟨\textit{key, value}⟩.
+
+Fondamentale è il \textbf{vincolo di unicità} sulle chiavi: ogni chiave deve identificare univocamente un item nella mappa.
+I valori, invece, non è obbligatorio che siano univoci: lo stesso value può essere associato a più chiavi diverse, ma non possono esistere due item con la stessa key.
+
+Python contiene già una implementazione di Dizionario (questo per capire quanto sia importante come struttura dati). L'implementazione che fornisce Python è una di quelle che studieremo, ma non sarà l'unica possibile.
+Le varie implementazioni saranno:
+\begin{itemize}
+    \item Mediante un array non ordinato.
+    \item Mediante un array ordinato.
+    \item Usando alberi di vario tipo.
+    \item Usando tabella hash.
+\end{itemize}
+
+\subsection{Implementazione mediante lista doppiamente linkata non ordinata}
+Implementare una Map mediante una lista doppiamente linkata non ordinata non è il massimo per quanto riguarda le performances.
+\begin{itemize}
+    \item Inserimento: Tempo $O(1)$
+    \item Ricerca e rimozione: Tempo $O(n)$
+\end{itemize}
+
+\noindent
+Nel caso pessimo bisogna scorrere l'intera lista per cercare una chiave (nel caso in cui l'elemento è l'ultimo dell'array) o renderti conto che non è presente (nel caso in cui l'elemento appunto non è contenuto).
+
+\subsection{Sorted Map}
+Una \textbf{Sorted Map} è una mappa che mantiene gli item ordinati in base alle chiavi. Questo ovviamente implica che le chiavi debbano essere di un tipo di valore ordinabile.
+
+Gli item sono ordinati in base all'ordinamento delle chiavi.
+La sorted map supporta un'operazione chiamata “Nearest Neighbour”.
+Questa operazione implica che, rispetto alla mappa non ordinata, possiamo fare una ricerca e sapere con tempo $O(1)$ il successore ed il predecessore, questo può essere utile quando cerchiamo una chiave che non è contenuta nella SortedMap per conoscere la chiave più vicina al valore oggetto della nostra ricerca.
+
+\begin{itemize}
+    \item Successore: Data una chiave K mi dici qual è la chiave più piccola tra tutte quelle che sono maggiori k.
+    \item Predecessore: Data una chiave K mi dici qual è la chiave più grande tra tutte quelle che sono minori k.
+\end{itemize}
+
+\noindent
+Non solo, sfruttando sempre la proprietà dell'ordinamento possiamo dire il massimo ed il minimo dell'intera mappa.
+
+\vspace{1\baselineskip}
+Una possibile implementazione di Sorted Map è quella mediante un array ordinato.
+In questo caso, per inserire un nuovo item, dobbiamo trovare la posizione corretta per mantenere l'ordinamento.
+Questo richiede una ricerca binaria, che ha un costo di $O(\log n)$, seguita da uno spostamento degli elementi per fare spazio al nuovo item, che ha un costo di $O(n)$ nel caso pessimo.
+Quindi, l'inserimento in una Sorted Map implementata con un array ordinato ha un costo complessivo di $O(n)$.
+
+Questa implementazione può essere efficiente se la struttura dati viene utilizzata per effettuare ricerche frequenti con pochissime operazioni di inserimento/cancellazione.

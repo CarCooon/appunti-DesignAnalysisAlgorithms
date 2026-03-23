@@ -224,10 +224,10 @@ Per semplicità ipotizziamo che il numero di elementi $n$ sia un intero tale che
 
 \clearpage
 \section{Heap-Sort}
-L'algoritmo \textbf{Heap-Sort} sfrutta la struttura dati Heap: data la lista di partenza, inserisco tutti gli elementi in un \textbf{Max-Heap} (al fine di avere gli elementi in ordine crescente alla fine dell'algoritmo) e poi estraggo ripetutamente l'elemento massimo (la radice del Max-Heap) per costruire la lista ordinata. Questo algoritmo viene eseguito già in tempo $O(n \cdot \log n)$, poiché l'inserimento di $n$ elementi in un Heap richiede un tempo $O(n)$ (grazie all'algoritmo Heapify) e ogni estrazione dell'elemento massimo richiede un tempo $O(\log n)$, per un totale di $n$ estrazioni.
+L'algoritmo \textbf{Heap-Sort} sfrutta la struttura dati Heap: data la lista di partenza, inserisco tutti gli elementi in un \textbf{Min-Heap} (al fine di avere gli elementi in ordine crescente alla fine dell'algoritmo) e poi estraggo ripetutamente l'elemento massimo (la radice del Min-Heap) per costruire la lista ordinata. Questo algoritmo viene eseguito già in tempo $O(n \cdot \log n)$, poiché l'inserimento di $n$ elementi in un Heap richiede un tempo $O(n)$ (grazie all'algoritmo Heapify) e ogni estrazione dell'elemento massimo richiede un tempo $O(\log n)$, per un totale di $n$ estrazioni.
 
 \subsection*{L'idea per un ordinamento in-place}
-L'algoritmo che presentiamo di seguito è una versione più raffinata dello stesso Heap-sort che anziché utilizzare memoria aggiuntiva permette di avere un \textbf{ordinamento in-place} (cioè occupa al più memoria aggiuntiva $O(1)$) dell'Heap-sort.
+L'algoritmo che presentiamo di seguito è una versione più raffinata dello stesso Heap-sort che anziché utilizzare memoria aggiuntiva permette di avere un \textbf{ordinamento in-place} (cioè occupa al più memoria aggiuntiva $O(1)$) dell'Heap-sort, e utilizza invece un \textbf{Max-Heap} per costruire l'array ordinato in senso crescente.
 
 L'idea chiave è dividere l'array $C$ in due parti contigue:
 \begin{enumerate}

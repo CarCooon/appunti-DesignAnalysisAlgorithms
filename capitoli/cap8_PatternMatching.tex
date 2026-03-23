@@ -115,7 +115,7 @@ Per formalizzare l'algoritmo di \emph{Boyer-Moore} possiamo generalizzare il fun
 
 \begin{itemize}
     \item Quando viene trovata una corrispondenza (a partire dall'ultimo carattere del pattern), l'algoritmo continua cercando di estendere la corrispondenza con il penultimo carattere del pattern nel suo allineamento corrente. Questo processo continua fino a quando tutti i caratteri del pattern sono stati confrontati con esito positivo o fino a quando si verifica un mismatch.
-    \item Quando si verifica un mismsatch, e il carattere del testo che ha causato il mismatch non è presente nel pattern, il pattern viene spostato completamente oltre quel carattere del testo. Se il carattere del testo è presente da qualche altra parte nel pattern, dobbiamo considerare due diversi casi a seconda che la sua ultima occorrenza (nel pattern) sia $(a)$ precedente o $(b)$ successiva al carattere del pattern che era allineato con il carattere del testo che ha causato il mismatch.
+    \item Quando si verifica un mismsatch, e il carattere del testo che ha causato il mismatch non è presente nel pattern, il pattern viene spostato completamente oltre quel carattere del testo. Se il carattere del testo è presente da qualche altra parte nel pattern, dobbiamo considerare due diversi casi a seconda che la sua ultima occorrenza (nel pattern) sia $(a)$ precedente o $(b)$ successiva al carattere del pattern che ha causato il mismatch.
 \end{itemize}
 
 Questi due casi sono rappresentati in figura \ref{fig:BM_mismatch_cases} e approfonfiti di seguito:

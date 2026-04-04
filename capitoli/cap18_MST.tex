@@ -126,17 +126,18 @@ Output: A minimum spanning tree \(T\) for \(G\)
 5.          \(D[v] = +\infty\)
 6.      Initialize \(T\) = empty set
 7.      Initialize a priority queue \(Q\) with an entry (\(D[v], (v, \text{None})\))  
-             \textbf{for each} vertex \(v\), where \(D[v]\) is the key in the priority  
+             for each vertex \(v\), where \(D[v]\) is the key in the priority  
              queue, and (\(v, \text{None})\) is the associated value.
 8.      \textbf{while} \(Q\) is not empty \textbf{do}
 9.          (\(u, e\)) = \text{value returned by } \(Q\).\text{remove\_min}()
-10.         Connect vertex \(u\) to \(T\) using edge \(e\).
-11.         \textbf{for each} edge \(e' = (u, v)\) such that \(v\) in \(Q\) \textbf{do}
-12.             # check if edge \((u, v)\) better connects \(v\) to \(T\)
-13.             \textbf{if} \(w(u, v) < D[v]\) \textbf{then}
-14.                 \(D[v] = w(u, v)\)
-15.                 Change the key of vertex \(v\) in \(Q\) to \(D[v]\).
-16.                 Change the value of vertex \(v\) in \(Q\) to (\(v, e'\)).
+10.         \textbf{if} \(e \text{is not None}\) \textbf{then}
+11.             Add edge \(e\) to \(T\)
+12.         \textbf{for each} edge \(e' = (u, v)\) such that \(v\) in \(Q\) \textbf{do}
+13.             # check if edge \((u, v)\) better connects \(v\) to \(T\)
+14.             \textbf{if} \(w(u, v) < D[v]\) \textbf{then}
+15.                 \(D[v] = w(u, v)\)
+16.                 Change the key of vertex \(v\) in \(Q\) to \(D[v]\).
+17.                 Change the value of vertex \(v\) in \(Q\) to (\(v, e'\)).
 17.     \textbf{return} the tree \(T\)     
 \end{alltt}
 \hrule 

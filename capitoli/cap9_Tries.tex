@@ -13,7 +13,7 @@ Sia $S$ un insieme di $s$ stringhe su un alfabeto $\Sigma$ tale che nessuna stri
 \end{itemize}
 
 \noindent
-Dunque, un trie $T$ rappresenta le stringhe di $S$ tramite i percorsi dalla radice alle foglie di $T$. È importante assumere che nessuna stringa in $S$ sia prefisso di un'altra sintra poichè ciò garantisce che ogni stringa di $S$ sia univocamente associata a una foglia di $T$. Possiamo sempre soddisfare questa assunzione aggiungendo un carattere speciale che non è nell'alfabeto originale $\Sigma$ alla fine di ogni stringa.
+Dunque, un trie $T$ rappresenta le stringhe di $S$ tramite i percorsi dalla radice alle foglie di $T$. È importante assumere che nessuna stringa in $S$ sia prefisso di un'altra stringa poichè ciò garantisce che ogni stringa di $S$ sia univocamente associata a una foglia di $T$. Possiamo sempre soddisfare questa assunzione aggiungendo un carattere speciale che non è nell'alfabeto originale $\Sigma$ alla fine di ogni stringa.
 
 \clearpage
 \noindent
@@ -173,7 +173,7 @@ In questa tipologia di problema abbiamo a disposizione un insieme noto e fissato
     Un'applicazione di questo problema riguarda l'autocompletamento all'interno di un IDE. Nel database rientrano tutti i nomi delle classi, metodi e variabili definite dal programmatore, mentre la stringa S rappresenta quello che si sta digitando (es. "List"). Come risultato l'IDE mostra istantaneamente non solo ciò che inizia con "List", ma tutto ciò che lo contiene (es. ArrayList, LinkedList, ListListener).
 }. 
 
-Osservando attentamente questo problema notiamo che si tratta in effetti del problema duale del \emph{pattern matching}, in cui abbiamo un testo fisso e cerchiamo un pattern variabile. Qui, invece, abbiamo un insieme fisso di pattern e cerchiamo una sottostringa che variabile.
+Osservando attentamente questo problema notiamo che si tratta in effetti del problema duale del \emph{pattern matching}, in cui abbiamo un testo fisso e cerchiamo un pattern variabile. Qui, invece, abbiamo un insieme fisso di pattern e cerchiamo una sottostringa che è variabile.
 
 Supponiamo che la lunghezza totale delle stringhe nel database sia pari a $m$. Siccome normalmente questo valore $m$ può essere molto grande, vogliamo limitare lo spazio utilizzato per memorizzare il database, limitare il tempo necessario per il pre-processing e limitare la fase di ricerca il più possibile.
 
